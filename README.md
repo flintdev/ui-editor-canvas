@@ -1,10 +1,10 @@
-# ui-editor
+# ui-editor-canvas
 
 ```jsx
 this.operations = {};
 const components = [];  // tree structure
 
-<UIEditor
+<UIEditorCanvas
   operations={this.operations}
   components={components} // tree sturcture
   componentsUpdated={(components) => {}}
@@ -19,7 +19,8 @@ interface Operations {
 }
 
 interface ComponentData {
-  reactComponent: React.ElementComponent,
+  id: string|number,
+  name: string,
   editableParams: object[],
   displayData: object,
 }
