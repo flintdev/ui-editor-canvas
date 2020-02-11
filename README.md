@@ -7,6 +7,7 @@ const components = [];  // tree structure
 <UIEditorCanvas
   operations={this.operations}
   components={components} // tree sturcture
+  editorLib={editorLib} 
   componentsUpdated={(components) => {}}
   componentOnSelect={(componentData) => {}}
   componentOnDelete={(componentData) => {}}
@@ -18,10 +19,16 @@ interface Operations {
   addComponent: (componentData) => void,
 }
 
+interface EditorLib {
+  generateEditableReactComponent: (name: string, params: object) => void
+}
+
 interface ComponentData {
   id: string|number,
   name: string,
-  editableParams: object[],
-  displayData: object,
+  params: object,
+  children: Array<ComponentData>
 }
+
+type Components = Array<ComponentData>;
 ```
