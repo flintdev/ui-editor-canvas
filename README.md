@@ -20,14 +20,16 @@ interface Operations {
 }
 
 interface EditorLib {
-  generateEditableReactComponent: (name: string, params: object) => void
+  generateWidgetReactComponent: (name: string, params: object) => void
 }
 
 interface ComponentData {
   id: string|number,
   name: string,
   params: object,
-  children: Array<ComponentData>
+  children?: Array<ComponentData>,
+  path: Array<string|number>,
+  tag: string
 }
 
 type Components = Array<ComponentData>;
