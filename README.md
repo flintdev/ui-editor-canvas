@@ -28,8 +28,8 @@ interface ComponentData {
   name: string,
   params: object,
   children?: Array<ComponentData>,
-  path: Array<string|number>,
-  tag: string
+  path?: Array<string|number>,
+  tag?: string
 }
 
 type Components = Array<ComponentData>;
