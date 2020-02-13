@@ -6,7 +6,7 @@ const components = [];  // tree structure
 
 <UIEditorCanvas
   operations={this.operations}
-  components={components} // tree sturcture
+  components={components} // tree structure
   editorLib={editorLib} 
   componentsUpdated={(components) => {}}
   componentOnSelect={(componentData) => {}}
