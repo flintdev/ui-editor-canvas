@@ -1,26 +1,26 @@
 # ui-editor-canvas
 
 ```jsx
-this.operations = {};
-const components = [];  // tree structure
+this.operations: Operations = {};
+const components: Components = [];  // tree structure
 
 <UIEditorCanvas
   operations={this.operations}
   components={components} // tree structure
   editorLib={editorLib} 
-  componentsUpdated={(components) => {}}
-  componentOnSelect={(componentData) => {}}
-  componentOnDelete={(componentData) => {}}
+  componentsUpdated={(components: Components) => {}}
+  componentOnSelect={(componentData: ComponentData) => {}}
+  componentOnDelete={(componentData: ComponentData) => {}}
 />
 ```
 
 ```typescript
 interface Operations {
-  addComponent: (componentData) => void,
+  addComponent: (componentData: ComponentData) => void,
 }
 
 interface EditorLib {
-  generateWidgetReactComponent: (name: string, params: object) => void
+  generateWidgetReactComponent: (componentData: ComponentData) => void
 }
 
 interface ComponentData {
