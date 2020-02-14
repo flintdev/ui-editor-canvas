@@ -20,7 +20,7 @@ interface Operations {
 }
 
 interface EditorLib {
-  generateWidgetReactComponent: (componentData: ComponentData) => void
+  getWidget: (name: string, props: object) => void
 }
 
 interface ComponentData {
