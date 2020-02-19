@@ -17,6 +17,7 @@ const components: Components = [];  // tree structure
 ```typescript
 interface Operations {
   addComponent?: (componentData: ComponentData) => void,
+  updateComponents?: (components: ComponentData[]) => void,
 }
 
 interface EditorLib {
