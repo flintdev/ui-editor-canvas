@@ -7,10 +7,11 @@ import { ComponentData } from "./interface";
 
 const styles = createStyles({
     root: {
-        '&:hover': {
-            opacity: 0.95
-        },
-        display: 'inline-block'
+        // height: '100%',
+        // width: '100%'
+        padding: 10,
+        background: `#eeeeee80`,
+        border: `1px dashed grey`,
     },
 });
 
@@ -33,20 +34,34 @@ class UIEditorCanvas extends React.Component<any, object> {
         console.log('>>> addComponent.componentData', componentData)
     }
 
-    renderComponents(components: Array<ComponentData>): Array<React.ReactElement> {
+    renderComponents(components: Array<ComponentData>, prevPath:any[] = []): Array<React.ReactElement> {
         const { editorLib, componentOnSelect, classes } = this.props;
         const handleClick = (e: any, component: any) => {
             e.stopPropagation();
             componentOnSelect(component);
         }
         return components.map((component: ComponentData, index: number) => {
+            const newPath = prevPath.concat(component!.id.toString());
             const RenderedComponent: React.ReactElement = editorLib.getWidget(component.name, {
                 ...component,
                 draggableProps: {
                     draggableId: component.id as string,
                     index: index    
                 },
-                children: this.renderComponents(!!component.children ? component.children : [])
+                dnd: true,
+                draggableRootStyle: (isDragging: boolean) => {
+                    return {
+                        borderRight: `5px solid ${isDragging ? 'red' : 'darkred'}`,
+                    }
+                },
+                droppableContainerStyle: (isDraggingOver: boolean) => {
+                    return {
+                        backgroundColor: isDraggingOver ? 'grey' : '#eeeeee80',
+                        height: `100%`,
+                        width: `100%`
+                    }
+                },
+                children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })
 
             return (
@@ -56,6 +71,7 @@ class UIEditorCanvas extends React.Component<any, object> {
                     onClick={(e: any) => handleClick(e, component)}
                     className={classes.root}
                 >
+                    path: {JSON.stringify(newPath)}
                     {RenderedComponent}
                 </ComponentWrapper>
             );
@@ -69,9 +85,7 @@ class UIEditorCanvas extends React.Component<any, object> {
         return (
             <>
                 <CanvasWrapper onDragEnd={this.onDragEnd} canvasDroppableId={'main'}>
-                    <div style={{display: 'flex'}}>
-                        {this.renderComponents(components)}
-                    </div>
+                    {this.renderComponents(components)}
                 </CanvasWrapper>
             </>
         )
