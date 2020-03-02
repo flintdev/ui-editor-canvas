@@ -2,6 +2,18 @@ import { WidgetName } from "@flintdev/material-widgets";
 
 export const initComponentsData = [
     {
+        id: 'button-5',
+        name: WidgetName.Button,
+        params: {
+            label: 'button5',
+            variant: "outlined"
+        },
+        children: [],
+        path: [],
+        tag: '',
+        dnd: true
+    },
+    {
         id: 'grid-0',
         name: WidgetName.Grid,
         params: {

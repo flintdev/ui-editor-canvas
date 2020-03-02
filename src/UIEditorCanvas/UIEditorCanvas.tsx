@@ -34,8 +34,8 @@ class UIEditorCanvas extends React.Component<any, object> {
         console.log('>>> addComponent.componentData', componentData)
     }
 
-    renderComponents(components: Array<ComponentData>, prevPath:any[] = []): Array<React.ReactElement> {
-        const { editorLib, componentOnSelect, classes } = this.props;
+    renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
+        const { editorLib, componentOnSelect, classes, isDnd } = this.props;
         const handleClick = (e: any, component: any) => {
             e.stopPropagation();
             componentOnSelect(component);
@@ -46,9 +46,9 @@ class UIEditorCanvas extends React.Component<any, object> {
                 ...component,
                 draggableProps: {
                     draggableId: component.id as string,
-                    index: index    
+                    index: index
                 },
-                dnd: true,
+                dnd: isDnd,
                 draggableRootStyle: (isDragging: boolean) => {
                     return {
                         borderRight: `5px solid ${isDragging ? 'red' : 'darkred'}`,
@@ -64,7 +64,7 @@ class UIEditorCanvas extends React.Component<any, object> {
                 children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })
 
-            return (
+            return !isDnd ? RenderedComponent : (
                 <ComponentWrapper
                     key={`ComponentWrapper-${index}`}
                     tag={component.tag}
@@ -74,7 +74,8 @@ class UIEditorCanvas extends React.Component<any, object> {
                     path: {JSON.stringify(newPath)}
                     {RenderedComponent}
                 </ComponentWrapper>
-            );
+            )
+
         })
     }
 

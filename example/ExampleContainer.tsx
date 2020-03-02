@@ -6,6 +6,8 @@ import UIEditorCanvas from "../src/UIEditorCanvas";
 import { getWidget, WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData } from "./data/initComponentsData";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
 interface Operations {
     addComponent?: (componentData: ComponentData) => void,
@@ -36,6 +38,8 @@ const styles = createStyles({
     left: {
         width: `20vw`,
         height: `100vw`,
+        display: 'flex',
+        flexDirection: `column`
     },
     right: {
         width: `20vw`,
@@ -51,20 +55,30 @@ const styles = createStyles({
 
 class ExampleContainer extends React.Component<any, object> {
     state = {
-        selected: ''
+        selected: '',
+        isDnd: true
     }
     editorLib: EditorLib = {
         getWidget: getWidget
     };
+    handleChange() {
+        this.setState({ isDnd: !this.state.isDnd })
+    }
     operations: Operations = {};
     components: Components = initComponentsData;
     render() {
         const { classes } = this.props;
-        const { selected } = this.state;
+        const { selected, isDnd } = this.state;
         return (
             <div className={classes.root}>
                 {/* LEFT */}
                 <div className={classes.left}>
+                    <FormControlLabel
+                        control={
+                            <Switch checked={isDnd} onChange={() => this.handleChange()} value="checkedA" />
+                        }
+                        label="isDnd"
+                    />
                     <Button variant="contained" onClick={() => {
                         if (this.operations.addComponent) {
                             this.operations.addComponent(
@@ -86,6 +100,7 @@ class ExampleContainer extends React.Component<any, object> {
                 {/* CENTER */}
                 <div className={classes.center}>
                     <UIEditorCanvas
+                        isDnd={isDnd}
                         operations={this.operations}
                         components={this.components}
                         editorLib={this.editorLib}
