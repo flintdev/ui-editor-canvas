@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/flintdev/ui-editor-canvas#readme",
   "devDependencies": {
-    "@flintdev/material-widgets": "0.0.8",
+    "@flintdev/material-widgets": "0.0.9",
     "@flintdev/widget-builder": "0.0.7",
     "@material-ui/core": "^4.8.3",
     "@material-ui/icons": "^4.5.1",

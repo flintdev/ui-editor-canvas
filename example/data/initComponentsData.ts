@@ -143,9 +143,21 @@ export const initComponentsData = [
                         },
                         children: [],
                         path: [],
-                        tag: 'container1',
+                        tag: 'container0',
                         dnd: true
                     },
+                    {
+                        id: 'button-6',
+                        name: WidgetName.Button,
+                        params: {
+                            label: 'button6',
+                            variant: "outlined"
+                        },
+                        children: [],
+                        path: [],
+                        tag: 'container1',
+                        dnd: true
+                    }
                 ]
             },
             {
@@ -165,6 +177,20 @@ export const initComponentsData = [
                             height: `100%`,
                         },
                         xs: 12
+                    }
+                ],
+                children: [
+                    {
+                        id: 'button-7',
+                        name: WidgetName.Button,
+                        params: {
+                            label: 'button7',
+                            variant: "outlined"
+                        },
+                        children: [],
+                        path: [],
+                        tag: 'container0',
+                        dnd: true
                     }
                 ],
                 path: [],
