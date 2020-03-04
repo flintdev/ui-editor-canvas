@@ -9,7 +9,9 @@ import { initComponentsData } from "./data/initComponentsData";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
+let count = 0;
 interface Operations {
+    updateComponents?: (components: ComponentData[]) => void,
     addComponent?: (componentData: ComponentData) => void,
 }
 
@@ -23,7 +25,8 @@ interface ComponentData {
     params: object,
     children?: Array<ComponentData>,
     path?: Array<string | number>,
-    tag?: string
+    tag?: string,
+    columnParams?: object
 }
 
 type Components = Array<ComponentData>;
@@ -65,7 +68,7 @@ class ExampleContainer extends React.Component<any, object> {
         this.setState({ isDnd: !this.state.isDnd })
     }
     operations: Operations = {};
-    components: Components = initComponentsData;
+    components: Components = [];
     render() {
         const { classes } = this.props;
         const { selected, isDnd } = this.state;
@@ -81,20 +84,76 @@ class ExampleContainer extends React.Component<any, object> {
                     />
                     <Button variant="contained" onClick={() => {
                         if (this.operations.addComponent) {
+                            count += 1;
                             this.operations.addComponent(
                                 {
-                                    id: 'button-added-1',
+                                    id: `button-${count}`,
                                     name: WidgetName.Button,
                                     params: {
-                                        label: 'button-added'
+                                        label: `button-${count}`,
+                                        variant: "outlined"
                                     },
                                     children: [],
-                                    path: [''],
+                                    path: [],
                                     tag: ''
                                 }
                             );
                         }
-                    }}>Add Component</Button>
+                    }}>Add Button</Button>
+                    <Button variant="contained" onClick={() => {
+                        if (this.operations.addComponent) {
+                            count += 1;
+                            this.operations.addComponent(
+                                {
+                                    id: `button-${count}`,
+                                    name: WidgetName.TextField,
+                                    params: {
+                                        variant: "outlined"
+                                    },
+                                    children: [],
+                                    path: [],
+                                    tag: ''
+                                }
+                            );
+                        }
+                    }}>Add TextField</Button>
+                    <Button variant="contained" onClick={() => {
+                        if (this.operations.addComponent) {
+                            count += 1;
+                            this.operations.addComponent(
+                                {
+                                    id: `grid-${count}`,
+                                    name: WidgetName.Grid,
+                                    params: {
+                                        label: `grid-${count}`,
+                                        variant: "outlined",
+                                        container: true
+                                    },
+                                    columnParams: [
+                                        {
+                                            style: {
+                                                backgroundColor: 'lightgreen',
+                                                height: `100%`,
+                                                minHeight: 10
+                                            },
+                                            xs: 6
+                                        },
+                                        {
+                                            style: {
+                                                backgroundColor: 'lightgreen',
+                                                height: `100%`,
+                                                minHeight: 10
+                                            },
+                                            xs: 6
+                                        }
+                                    ],
+                                    children: [],
+                                    path: [],
+                                    tag: ''
+                                }
+                            );
+                        }
+                    }}>Add Grid</Button>
                 </div>
 
                 {/* CENTER */}
@@ -119,6 +178,11 @@ class ExampleContainer extends React.Component<any, object> {
 
                 {/* RIGHT */}
                 <div className={classes.right}>
+                    <Button variant="contained" onClick={() => {
+                        if (this.operations.updateComponents) {
+                            // this.operations.updateComponents([]);
+                        }
+                    }}>updateComponents</Button>
                     <TextField
                         value={selected}
                         onChange={e => this.setState({ selected: e.target.value })}

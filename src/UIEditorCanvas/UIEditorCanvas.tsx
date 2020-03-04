@@ -19,25 +19,78 @@ const ComponentWrapper = (props: any) => {
     return <div {...props}>{props.children}</div>
 }
 
-class UIEditorCanvas extends React.Component<any, object> {
+class UIEditorCanvas extends React.Component<any, any> {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            components: []
+        }
+
+        this.addComponent = this.addComponent.bind(this);
+    }
+
     onDragEnd = (result: any) => {
-        const { source, destination } = result;
-        console.log('>>> source', source);
-        console.log('>>> destination', destination);
+        console.log('>>> onDragEnd.result', result);
+        const { source, destination, draggableId } = result;
+        const [sourceDroppableId, sourceContainer] = source.droppableId.split("::");
+        const [destinationDroppableId, destinationContainer] = destination.droppableId.split("::");
+        let [sourceComponent, destinationComponent, curComponent] = Array(3);
+
+        const search = (nodes: any[]) => {
+            for (let node of nodes) {
+                if (node.id === draggableId) curComponent = node;
+                search(node.children)
+            }
+        };
+        search(this.state.components);
+
+        const update = (nodes: any[]) => {
+            for (let node of nodes) {
+                if (node.id === draggableId) continue
+                if (node.id === sourceDroppableId) {
+                    node.children = node.children.filter((child: any) => child.id !== draggableId);
+                }
+                if (node.id === destinationDroppableId) {
+                    node.children.splice(destination.index, 0, { ...curComponent, tag: destinationContainer });
+                }
+                node.children = update(node.children)
+            }
+            return nodes;
+        };
+
+        let newComponents = JSON.parse(JSON.stringify(update(this.state.components)));
+
+        if (sourceDroppableId === 'main') {
+            newComponents = newComponents.filter((child: any) => child.id !== draggableId);
+        }
+        if (destinationDroppableId === 'main') {
+            newComponents.splice(destination.index, 0, { ...curComponent, tag: destinationContainer });
+        }
+        this.handleComponentsUpdated(newComponents)
     };
 
+    handleComponentsUpdated(newComponents: any[]) {
+        this.setState({ components: newComponents })
+        this.props.componentsUpdated(newComponents);
+    }
+
     componentDidMount() {
+        this.handleComponentsUpdated(this.props.components)
         this.props.operations.addComponent = this.addComponent;
+        this.props.operations.updateComponents = this.updateComponents;
+    }
+
+    updateComponents(components: any[]) {
+        this.handleComponentsUpdated(components)
     }
 
     addComponent(componentData: ComponentData) {
-        console.log('>>> addComponent.componentData', componentData)
+        this.handleComponentsUpdated([componentData, ...this.state.components])
     }
 
     renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
         const { editorLib, componentOnSelect, classes, isDnd } = this.props;
         const handleClick = (e: any, component: any) => {
-            e.stopPropagation();
             componentOnSelect(component);
         }
         return components.map((component: ComponentData, index: number) => {
@@ -80,13 +133,11 @@ class UIEditorCanvas extends React.Component<any, object> {
     }
 
     render() {
-        const { operations, components, editorLib, componentsUpdated, componentOnSelect, componentOnDelete } = this.props;
-        const { classes } = this.props;
 
         return (
             <>
                 <CanvasWrapper onDragEnd={this.onDragEnd} canvasDroppableId={'main'}>
-                    {this.renderComponents(components)}
+                    {this.renderComponents(this.state.components)}
                 </CanvasWrapper>
             </>
         )
