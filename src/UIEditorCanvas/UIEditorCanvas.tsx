@@ -5,6 +5,7 @@ import { withStyles, createStyles } from '@material-ui/core/styles';
 import { CanvasWrapper } from "@flintdev/widget-builder";
 import { ComponentData } from "./interface";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import OpenWithIcon from '@material-ui/icons/OpenWith';
 
 const styles = createStyles({
     root: {
@@ -16,13 +17,16 @@ const styles = createStyles({
         // height: '100%',
         // width: '100%'
         position: 'relative',
-        padding: 10,
+        padding: 5,
         background: `#eeeeee80`,
         border: `1px dashed grey`,
     },
     actions: {
+        display: `flex`,
+        flexDirection: `row`,
+        backgroundColor: `lightgrey`,
         position: 'absolute',
-        top:0,
+        top: 0,
         right: 0,
         opacity: 0
     },
@@ -88,7 +92,7 @@ class UIEditorCanvas extends React.Component<any, any> {
     }
 
     handleComponentOnDelete(component: ComponentData) {
-        this.props.componentOnDelete({...component})
+        this.props.componentOnDelete({ ...component })
         const update = (nodes: any[]) => {
             for (let node of nodes) {
                 if (node.id === component.id) {
@@ -131,7 +135,7 @@ class UIEditorCanvas extends React.Component<any, any> {
                 dnd: isDnd,
                 draggableRootStyle: (isDragging: boolean) => {
                     return {
-                        borderRight: `5px solid ${isDragging ? 'red' : 'darkred'}`,
+                        // borderRight: `5px solid ${isDragging ? 'red' : 'darkred'}`,
                     }
                 },
                 droppableContainerStyle: (isDraggingOver: boolean) => {
@@ -141,7 +145,15 @@ class UIEditorCanvas extends React.Component<any, any> {
                         width: `100%`
                     }
                 },
-                children:this.renderComponents(!!component.children ? component.children : [], newPath)
+                renderHandle: (dragHandleProps: any) => {
+                    return (
+                        <div className={classes.actions} {...dragHandleProps}>
+                            <div {...dragHandleProps}><OpenWithIcon onClick={() => console.log('>>> path:', JSON.stringify(newPath))}></OpenWithIcon></div>
+                            <HighlightOffIcon onClick={() => this.handleComponentOnDelete(component)}></HighlightOffIcon>
+                        </div>
+                    )
+                },
+                children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })
 
             return !isDnd ? RenderedComponent : (
@@ -151,10 +163,6 @@ class UIEditorCanvas extends React.Component<any, any> {
                     onClick={(e: any) => handleClick(e, component)}
                     className={classes.root}
                 >
-                    <div className={classes.actions}>
-                        <HighlightOffIcon onClick={() => this.handleComponentOnDelete(component)}></HighlightOffIcon>
-                    </div>
-                    path: {JSON.stringify(newPath)}
                     {RenderedComponent}
                 </ComponentWrapper>
             )

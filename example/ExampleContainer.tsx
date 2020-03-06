@@ -134,7 +134,7 @@ class ExampleContainer extends React.Component<any, object> {
                                             style: {
                                                 backgroundColor: 'lightgreen',
                                                 height: `100%`,
-                                                minHeight: 10
+                                                minHeight: 50
                                             },
                                             xs: 6
                                         },
@@ -142,7 +142,7 @@ class ExampleContainer extends React.Component<any, object> {
                                             style: {
                                                 backgroundColor: 'lightgreen',
                                                 height: `100%`,
-                                                minHeight: 10
+                                                minHeight: 50
                                             },
                                             xs: 6
                                         }
