@@ -4,14 +4,27 @@ import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import { CanvasWrapper } from "@flintdev/widget-builder";
 import { ComponentData } from "./interface";
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 const styles = createStyles({
     root: {
+        '&:hover': {
+            '& $actions': {
+                opacity: 1
+            },
+        },
         // height: '100%',
         // width: '100%'
+        position: 'relative',
         padding: 10,
         background: `#eeeeee80`,
         border: `1px dashed grey`,
+    },
+    actions: {
+        position: 'absolute',
+        top:0,
+        right: 0,
+        opacity: 0
     },
 });
 
@@ -74,6 +87,20 @@ class UIEditorCanvas extends React.Component<any, any> {
         this.props.componentsUpdated(newComponents);
     }
 
+    handleComponentOnDelete(component: ComponentData) {
+        this.props.componentOnDelete({...component})
+        const update = (nodes: any[]) => {
+            for (let node of nodes) {
+                if (node.id === component.id) {
+                    node.children = node.children.filter((child: any) => child.id !== component.id);
+                }
+                node.children = update(node.children)
+            }
+            return nodes;
+        };
+        this.handleComponentsUpdated(update(this.state.components).filter((child: any) => child.id !== component.id))
+    }
+
     componentDidMount() {
         this.handleComponentsUpdated(this.props.components)
         this.props.operations.addComponent = this.addComponent;
@@ -114,7 +141,7 @@ class UIEditorCanvas extends React.Component<any, any> {
                         width: `100%`
                     }
                 },
-                children: this.renderComponents(!!component.children ? component.children : [], newPath)
+                children:this.renderComponents(!!component.children ? component.children : [], newPath)
             })
 
             return !isDnd ? RenderedComponent : (
@@ -124,6 +151,9 @@ class UIEditorCanvas extends React.Component<any, any> {
                     onClick={(e: any) => handleClick(e, component)}
                     className={classes.root}
                 >
+                    <div className={classes.actions}>
+                        <HighlightOffIcon onClick={() => this.handleComponentOnDelete(component)}></HighlightOffIcon>
+                    </div>
                     path: {JSON.stringify(newPath)}
                     {RenderedComponent}
                 </ComponentWrapper>
