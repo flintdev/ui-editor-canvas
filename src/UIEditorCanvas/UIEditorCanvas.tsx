@@ -44,6 +44,7 @@ class UIEditorCanvas extends React.Component<any, any> {
         }
 
         this.addComponent = this.addComponent.bind(this);
+        this.updateComponents = this.updateComponents.bind(this);
     }
 
     onDragEnd = (result: any) => {
@@ -147,11 +148,11 @@ class UIEditorCanvas extends React.Component<any, any> {
                 },
                 renderHandle: (dragHandleProps: any) => {
                     return (
-                        <div className={classes.actions} {...dragHandleProps}>
+                        <div className={classes.actions} {...dragHandleProps} key={`dragHandleProps-${index}`}>
                             <div {...dragHandleProps}><OpenWithIcon onClick={() => console.log('>>> path:', JSON.stringify(newPath))}></OpenWithIcon></div>
                             <HighlightOffIcon onClick={() => this.handleComponentOnDelete(component)}></HighlightOffIcon>
                         </div>
-                    )
+                   )
                 },
                 children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })

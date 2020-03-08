@@ -180,7 +180,7 @@ class ExampleContainer extends React.Component<any, object> {
                 <div className={classes.right}>
                     <Button variant="contained" onClick={() => {
                         if (this.operations.updateComponents) {
-                            // this.operations.updateComponents([]);
+                            this.operations.updateComponents([]);
                         }
                     }}>updateComponents</Button>
                     <TextField
