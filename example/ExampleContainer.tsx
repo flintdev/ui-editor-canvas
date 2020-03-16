@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import UIEditorCanvas from "../src/UIEditorCanvas";
+import UIEditorCanvas from "../dist/UIEditorCanvas";
 import { getWidget, WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData } from "./data/initComponentsData";
@@ -49,7 +49,7 @@ const styles = createStyles({
         height: `100vw`,
     },
     center: {
-        backgroundColor: 'lightblue',
+        backgroundColor: '#fafafa',
         width: `60vw`,
         height: `100vw`,
     },
@@ -127,26 +127,9 @@ class ExampleContainer extends React.Component<any, object> {
                                     params: {
                                         label: `grid-${count}`,
                                         variant: "outlined",
-                                        container: true
+                                        container: true,
+                                        columnCount: 2,
                                     },
-                                    columnParams: [
-                                        {
-                                            style: {
-                                                backgroundColor: 'lightgreen',
-                                                height: `100%`,
-                                                minHeight: 50
-                                            },
-                                            xs: 6
-                                        },
-                                        {
-                                            style: {
-                                                backgroundColor: 'lightgreen',
-                                                height: `100%`,
-                                                minHeight: 50
-                                            },
-                                            xs: 6
-                                        }
-                                    ],
                                     children: [],
                                     path: [],
                                     tag: ''
