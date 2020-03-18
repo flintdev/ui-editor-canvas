@@ -90,7 +90,7 @@ class ExampleContainer extends React.Component<any, object> {
                                     id: `button-${count}`,
                                     name: WidgetName.Button,
                                     params: {
-                                        label: `button-${count}`,
+                                        label: `state::$.button.title::displayValue::${JSON.stringify(`button-${count}`)}`,
                                         variant: "outlined"
                                     },
                                     children: [],

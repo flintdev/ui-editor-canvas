@@ -10,22 +10,48 @@ import OpenWithIcon from '@material-ui/icons/OpenWith';
 const styles = createStyles({
     root: {
         position: 'relative',
-        background: `#eeeeee80`,
-        border: `1px dashed grey`
-    },
-    rootbar: {
-        position: 'relative',
-        background: `#eeeeee80`,
-        border: `1px dashed grey`
+        '&:hover': {
+            '& $actions': {
+                opacity: 1
+            },
+        },
     },
     actions: {
         position: 'absolute',
+        background: `transparent`,
+        border: `1px dashed grey`,
         top: 0,
         left: 0,
+        height: `100%`,
+        width: `100%`
+    },
+    actionsSelectedGrid: {
+        position: 'absolute',
+        background: `transparent`,
+        border: `1px dashed grey`,
+        top: 0,
+        left: 0,
+        height: `100%`,
         width: `100%`,
         '&:before': {
             content: "\"\"",
             backgroundColor: '#9867f7',
+            height: 5,
+            position: 'absolute',
+            width: '100%',
+        }
+    },
+    actionsSelectedOther: {
+        position: 'absolute',
+        background: `transparent`,
+        border: `1px dashed grey`,
+        top: 0,
+        left: 0,
+        height: `100%`,
+        width: `100%`,
+        '&:before': {
+            content: "\"\"",
+            backgroundColor: "#13c2c2",
             height: 5,
             position: 'absolute',
             width: '100%',
@@ -37,7 +63,15 @@ const styles = createStyles({
         margin: 7,
         cursor: `pointer`
     },
-    actionContainer: {
+    actionContainerOther: {
+        display: `flex`,
+        flexDirection: `row`,
+        position: 'absolute',
+        right: 0,
+        backgroundColor: "#13c2c2",
+        borderRadius: `0 0 0 8px`,
+    },
+    actionContainerGrid: {
         display: `flex`,
         flexDirection: `row`,
         position: 'absolute',
@@ -139,18 +173,33 @@ class UIEditorCanvas extends React.Component<any, any> {
     addComponent(componentData: ComponentData) {
         this.handleComponentsUpdated([componentData, ...this.state.components])
     }
-
+    
     renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
         const { editorLib, componentOnSelect, classes, isDnd } = this.props;
         const handleClick = (e: any, component: any) => {
             e.stopPropagation();
             componentOnSelect(component);
-            this.setState({selected: component})
+            this.setState({ selected: component })
         }
+        const cleanParmas = (parmas: object) => {
+            return Object.keys(parmas).reduce<Record<string, any>>((ret, key) => {
+                if (typeof Object(parmas)[key] === "string") {
+                    if (Object(parmas)[key].split("::")[2] === 'displayValue') {
+                        ret[key] = JSON.parse(Object(parmas)[key].split("::")[3]);
+                        return ret;
+                    }
+                }
+
+                ret[key] = Object(parmas)[key];
+                return ret;
+            }, {});
+        }
+
         return components.map((component: ComponentData, index: number) => {
             const newPath = prevPath.concat(component!.id.toString());
             const RenderedComponent: React.ReactElement = editorLib.getWidget(component.name, {
                 ...component,
+                params: cleanParmas(component.params),
                 draggableProps: {
                     draggableId: component.id as string,
                     index: index
@@ -174,14 +223,16 @@ class UIEditorCanvas extends React.Component<any, any> {
                 },
                 renderHandle: (dragHandleProps: any) => {
                     return (
-                        <div className={classes.actions} 
+                        <div className={this.state.selected.id === component.id ? (
+                            component.name === "Grid" ? classes.actionsSelectedGrid : classes.actionsSelectedOther
+                        ) : classes.actions} 
                             key={`dragHandleProps-${index}`}
-                            style={{visibility: this.state.selected.id === component.id ? 'visible' : 'hidden'}}
+                            style={{zIndex: newPath.length}}
+                            {...dragHandleProps}
                         >
-                            <div className={classes.actionContainer}>
-                                <div {...dragHandleProps}>
-                                    <OpenWithIcon className={classes.actionIcon} onClick={() => console.log('>>> path:', JSON.stringify(newPath))}/>
-                                </div>
+                            <div className={component.name === "Grid" ? classes.actionContainerGrid : classes.actionContainerOther}
+                                style={{visibility: this.state.selected.id === component.id ? 'visible' : 'hidden'}}
+                            >
                                 <div>
                                     <HighlightOffIcon className={classes.actionIcon} onClick={() => this.handleComponentOnDelete(component)}/>
                                 </div>
@@ -197,7 +248,7 @@ class UIEditorCanvas extends React.Component<any, any> {
                     key={`ComponentWrapper-${index}`}
                     tag={component.tag}
                     onClick={(e: any) => handleClick(e, component)}
-                    className={this.state.selected.id === component.id ? classes.rootbar : classes.root}
+                    className={classes.root}
                 >
                     {RenderedComponent}
                 </ComponentWrapper>
