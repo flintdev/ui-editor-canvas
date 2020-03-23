@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import UIEditorCanvas from "../dist/UIEditorCanvas";
+import UIEditorCanvas from "../src/UIEditorCanvas";
 import { getWidget, WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData } from "./data/initComponentsData";
@@ -13,6 +13,7 @@ let count = 0;
 interface Operations {
     updateComponents?: (components: ComponentData[]) => void,
     addComponent?: (componentData: ComponentData) => void,
+    selectComponentById?: (componentId: string) => void,
 }
 
 interface EditorLib {
@@ -82,6 +83,11 @@ class ExampleContainer extends React.Component<any, object> {
                         }
                         label="isDnd"
                     />
+                    <Button onClick={() => {
+                        if (this.operations.selectComponentById) {
+                            this.operations.selectComponentById("button-2")
+                        }
+                    }}>Select "button-2"</Button>
                     <Button variant="contained" onClick={() => {
                         if (this.operations.addComponent) {
                             count += 1;
