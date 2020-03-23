@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import { CanvasWrapper } from "@flintdev/widget-builder";
+import { WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { ComponentData } from "./interface";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import OpenWithIcon from '@material-ui/icons/OpenWith';
@@ -18,8 +18,8 @@ const styles = createStyles({
     },
     actions: {
         position: 'absolute',
-        background: `transparent`,
-        border: `1px dashed grey`,
+        background: `lightgrey`,
+        border: `1px solid #ddd`,
         top: 0,
         left: 0,
         height: `100%`,
@@ -28,7 +28,7 @@ const styles = createStyles({
     actionsSelectedGrid: {
         position: 'absolute',
         background: `transparent`,
-        border: `1px dashed grey`,
+        border: `1px solid #ddd`,
         top: 0,
         left: 0,
         height: `100%`,
@@ -44,7 +44,7 @@ const styles = createStyles({
     actionsSelectedOther: {
         position: 'absolute',
         background: `transparent`,
-        border: `1px dashed grey`,
+        border: `1px solid #ddd`,
         top: 0,
         left: 0,
         height: `100%`,
@@ -90,16 +90,19 @@ class UIEditorCanvas extends React.Component<any, any> {
         super(props);
         this.state = {
             components: [],
-            selected: {}
+            selectedId: ""
         }
 
         this.addComponent = this.addComponent.bind(this);
+        this.selectComponentById = this.selectComponentById.bind(this);
         this.updateComponents = this.updateComponents.bind(this);
     }
 
     onDragEnd = (result: any) => {
         console.log('>>> onDragEnd.result', result);
         const { source, destination, draggableId } = result;
+        if (!destination) return;
+
         const [sourceDroppableId, sourceContainer] = source.droppableId.split("::");
         const [destinationDroppableId, destinationContainer] = destination.droppableId.split("::");
         let [sourceComponent, destinationComponent, curComponent] = Array(3);
@@ -163,8 +166,14 @@ class UIEditorCanvas extends React.Component<any, any> {
     componentDidMount() {
         this.handleComponentsUpdated(this.props.components)
         this.props.operations.addComponent = this.addComponent;
+        this.props.operations.selectComponentById = this.selectComponentById;
         this.props.operations.updateComponents = this.updateComponents;
     }
+
+    selectComponentById(componentId: string) {
+        this.setState({selectedId: componentId})
+    }
+
 
     updateComponents(components: any[]) {
         this.handleComponentsUpdated(components)
@@ -173,13 +182,13 @@ class UIEditorCanvas extends React.Component<any, any> {
     addComponent(componentData: ComponentData) {
         this.handleComponentsUpdated([componentData, ...this.state.components])
     }
-    
+
     renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
         const { editorLib, componentOnSelect, classes, isDnd } = this.props;
         const handleClick = (e: any, component: any) => {
             e.stopPropagation();
             componentOnSelect(component);
-            this.setState({ selected: component })
+            this.setState({ selectedId: component.id })
         }
         const cleanParmas = (parmas: object) => {
             return Object.keys(parmas).reduce<Record<string, any>>((ret, key) => {
@@ -197,58 +206,53 @@ class UIEditorCanvas extends React.Component<any, any> {
 
         return components.map((component: ComponentData, index: number) => {
             const newPath = prevPath.concat(component!.id.toString());
+            const { droppableContainerStyle, isDraggable, draggableRootStyle } = component;
+            const handleClickWithComponent = (e: any) => {
+                handleClick(e, component)
+            }
             const RenderedComponent: React.ReactElement = editorLib.getWidget(component.name, {
                 ...component,
                 params: cleanParmas(component.params),
                 draggableProps: {
                     draggableId: component.id as string,
-                    index: index
+                    index: index,
+                    isDraggable: isDraggable
                 },
                 dnd: isDnd,
-                draggableRootStyle: (isDragging: boolean) => {
+                onDragEnd: (data: any) => this.onDragEnd(data),
+                draggableRootStyle: !!draggableRootStyle ?
+                () => draggableRootStyle() :
+                () => {
                     return {
-                        // borderRight: `5px solid ${isDragging ? 'red' : 'darkred'}`,
+                        backgroundColor: component.name === "Grid" ? '#e0d8ef' : 'white',
                         padding: 5,
-                        backgroundColor: component.name === "Grid" ? '#ccb9f1' : 'white'
+                        boxShadow: this.state.selectedId === component.id  ? `inset 0px 0px 0px 5px #13c2c2` : "inset 0px 0px 0px 5px #0000ff00",
+                        transition: `all .5s`,
+                        border: `1px solid grey`,
+                        margin: 1
                     }
                 },
-                droppableContainerStyle: (isDraggingOver: boolean) => {
-                    return {
-                        backgroundColor: isDraggingOver ? '#9867f7' : 'white',
-                        height: `100%`,
-                        width: `100%`,
-                        minHeight: 60,
-                        border: `1px dashed grey`
-                    }
+                droppableContainerStyle: !!droppableContainerStyle ?
+                    (isDraggingOver: boolean) => droppableContainerStyle(isDraggingOver) :
+                    (isDraggingOver: boolean) => {
+                        return {
+                            backgroundColor: isDraggingOver ? '#9867f7' : (component.name === "Grid" ? '#bca2ef' : 'white'),
+                            minHeight: 60,
+                            margin: 5,
+                            border: `15px solid #bca2ef`
+                        }
                 },
-                renderHandle: (dragHandleProps: any) => {
-                    return (
-                        <div className={this.state.selected.id === component.id ? (
-                            component.name === "Grid" ? classes.actionsSelectedGrid : classes.actionsSelectedOther
-                        ) : classes.actions} 
-                            key={`dragHandleProps-${index}`}
-                            style={{zIndex: newPath.length}}
-                            {...dragHandleProps}
-                        >
-                            <div className={component.name === "Grid" ? classes.actionContainerGrid : classes.actionContainerOther}
-                                style={{visibility: this.state.selected.id === component.id ? 'visible' : 'hidden'}}
-                            >
-                                <div>
-                                    <HighlightOffIcon className={classes.actionIcon} onClick={() => this.handleComponentOnDelete(component)}/>
-                                </div>
-                            </div>
-                        </div>
-                   )
-                },
+                onMouseDown: (e: any) => handleClickWithComponent(e),
                 children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })
 
-            return !isDnd ? RenderedComponent : (
+            return true ? RenderedComponent : (
                 <ComponentWrapper
                     key={`ComponentWrapper-${index}`}
                     tag={component.tag}
-                    onClick={(e: any) => handleClick(e, component)}
+                    style={{ margin: 10 }}
                     className={classes.root}
+                    id={component.id}
                 >
                     {RenderedComponent}
                 </ComponentWrapper>
@@ -258,12 +262,36 @@ class UIEditorCanvas extends React.Component<any, any> {
     }
 
     render() {
-
         return (
             <>
-                <CanvasWrapper onDragEnd={this.onDragEnd} canvasDroppableId={'main'}>
-                    {this.renderComponents(this.state.components)}
-                </CanvasWrapper>
+                {
+                    this.renderComponents(
+                        [
+                            {
+                                id: `main`,
+                                name: WidgetName.Grid,
+                                params: {
+                                    container: true,
+                                    columnCount: 1
+                                },
+                                isDraggable: false,
+                                children: this.state.components,
+                                path: [],
+                                tag: '',
+                                droppableContainerStyle: (isDraggingOver: boolean) => {
+                                    return {
+                                        backgroundColor: isDraggingOver ? '#9867f7' : (true ? '#bca2ef' : 'white'),
+                                        height: `100vh`
+                                    }
+                                },
+                                draggableRootStyle: () => {
+                                    return {
+
+                                    }
+                                }
+                            }
+                        ])
+                }
             </>
         )
     }

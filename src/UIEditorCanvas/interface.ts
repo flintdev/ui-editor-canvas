@@ -12,7 +12,10 @@ export interface ComponentData {
     params: object,
     children?: Array<ComponentData>,
     path?: Array<string | number>,
-    tag?: string
+    tag?: string,
+    isDraggable?: boolean,
+    droppableContainerStyle?: Function,
+    draggableRootStyle?: Function
 }
 
 export type Components = Array<ComponentData>;
