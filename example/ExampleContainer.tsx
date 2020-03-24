@@ -93,6 +93,23 @@ class ExampleContainer extends React.Component<any, object> {
                             count += 1;
                             this.operations.addComponent(
                                 {
+                                    id: `Label-${count}`,
+                                    name: WidgetName.Label,
+                                    params: {
+                                        text: `state::$.button.title::displayValue::${JSON.stringify(`Label-${count}`)}`,
+                                    },
+                                    children: [],
+                                    path: [],
+                                    tag: ''
+                                }
+                            );
+                        }
+                    }}>Add Label</Button>
+                    <Button variant="contained" onClick={() => {
+                        if (this.operations.addComponent) {
+                            count += 1;
+                            this.operations.addComponent(
+                                {
                                     id: `button-${count}`,
                                     name: WidgetName.Button,
                                     params: {
@@ -111,7 +128,7 @@ class ExampleContainer extends React.Component<any, object> {
                             count += 1;
                             this.operations.addComponent(
                                 {
-                                    id: `button-${count}`,
+                                    id: `TextField-${count}`,
                                     name: WidgetName.TextField,
                                     params: {
                                         variant: "outlined"
