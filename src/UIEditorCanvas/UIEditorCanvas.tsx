@@ -2,10 +2,15 @@
 
 import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import { WidgetName, WidgetProps } from "@flintdev/material-widgets";
+import { WidgetName, WidgetProps, getWidget } from "@flintdev/material-widgets";
 import { ComponentData } from "./interface";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import OpenWithIcon from '@material-ui/icons/OpenWith';
+import { HotKeys } from "react-hotkeys";
+
+const keyMap = {
+    DELETE_NODE: ["del", "backspace"]
+};
 
 const styles = createStyles({
     root: {
@@ -100,8 +105,9 @@ class UIEditorCanvas extends React.Component<any, any> {
 
     onDragEnd = (result: any) => {
         console.log('>>> onDragEnd.result', result);
-        const { source, destination, draggableId } = result;
+        const { source, destination, draggableId, isValid } = result;
         if (!destination) return;
+        if (!isValid) return;
 
         const [sourceDroppableId, sourceContainer] = source.droppableId.split("::");
         const [destinationDroppableId, destinationContainer] = destination.droppableId.split("::");
@@ -147,12 +153,21 @@ class UIEditorCanvas extends React.Component<any, any> {
         this.props.componentsUpdated(newComponents);
     }
 
-    handleComponentOnDelete(component: ComponentData) {
-        this.props.componentOnDelete({ ...component })
+    handlers = {
+        DELETE_NODE: () => {
+            console.log('>>> delete')
+            if (this.state.selectedId) {
+                this.handleComponentOnDeleteById(this.state.selectedId)
+            }
+        }
+    };
+
+    handleComponentOnDeleteById(componentId: string) {
+        let nodeToDelete = {};
         const update = (nodes: any[]) => {
             return nodes.reduce((ret, node) => {
-                if (node.id === component.id) {
-                    node.children = node.children.filter((child: any) => child.id !== component.id);
+                if (node.id === componentId) {
+                    nodeToDelete = {...node}
                 } else {
                     node.children = update(node.children)
                     ret.push(node);
@@ -160,7 +175,10 @@ class UIEditorCanvas extends React.Component<any, any> {
                 return ret;
             }, []);
         };
-        this.handleComponentsUpdated(update(this.state.components).filter((child: any) => child.id !== component.id))
+        this.handleComponentsUpdated(
+            update(this.state.components)
+        )
+        this.props.componentOnDelete({ ...nodeToDelete })
     }
 
     componentDidMount() {
@@ -171,9 +189,8 @@ class UIEditorCanvas extends React.Component<any, any> {
     }
 
     selectComponentById(componentId: string) {
-        this.setState({selectedId: componentId})
+        this.setState({ selectedId: componentId })
     }
-
 
     updateComponents(components: any[]) {
         this.handleComponentsUpdated(components)
@@ -221,17 +238,17 @@ class UIEditorCanvas extends React.Component<any, any> {
                 dnd: isDnd,
                 onDragEnd: (data: any) => this.onDragEnd(data),
                 draggableRootStyle: !!draggableRootStyle ?
-                () => draggableRootStyle() :
-                () => {
-                    return {
-                        backgroundColor: component.name === "Grid" ? '#e0d8ef' : 'white',
-                        padding: 5,
-                        boxShadow: this.state.selectedId === component.id  ? `inset 0px 0px 0px 5px #13c2c2` : "inset 0px 0px 0px 5px #0000ff00",
-                        transition: `all .5s`,
-                        border: `1px solid grey`,
-                        margin: 1
-                    }
-                },
+                    () => draggableRootStyle() :
+                    () => {
+                        return {
+                            backgroundColor: component.name === "Grid" ? '#e0d8ef' : 'white',
+                            padding: 5,
+                            boxShadow: this.state.selectedId === component.id ? `inset 0px 0px 0px 5px #13c2c2` : "inset 0px 0px 0px 5px #0000ff00",
+                            transition: `all .5s`,
+                            border: `1px solid grey`,
+                            margin: 1
+                        }
+                    },
                 droppableContainerStyle: !!droppableContainerStyle ?
                     (isDraggingOver: boolean) => droppableContainerStyle(isDraggingOver) :
                     (isDraggingOver: boolean) => {
@@ -241,7 +258,7 @@ class UIEditorCanvas extends React.Component<any, any> {
                             margin: 5,
                             border: `15px solid #bca2ef`
                         }
-                },
+                    },
                 onMouseDown: (e: any) => handleClickWithComponent(e),
                 children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })
@@ -261,38 +278,58 @@ class UIEditorCanvas extends React.Component<any, any> {
         })
     }
 
+    renderWidgetList() {
+        console.log('>>> renderWidgetList', Object.keys(WidgetName))
+        const names = [] as WidgetName[];
+        return names.map((widgetName: WidgetName, index: number) => getWidget(widgetName, {
+            draggableProps: {
+                draggableId: `${widgetName}-base`,
+                index,
+            }
+        } as WidgetProps))
+    }
+
     render() {
         return (
-            <>
-                {
-                    this.renderComponents(
-                        [
-                            {
-                                id: `main`,
-                                name: WidgetName.Grid,
-                                params: {
-                                    container: true,
-                                    columnCount: 1
-                                },
-                                isDraggable: false,
-                                children: this.state.components,
-                                path: [],
-                                tag: '',
-                                droppableContainerStyle: (isDraggingOver: boolean) => {
-                                    return {
-                                        backgroundColor: isDraggingOver ? '#9867f7' : (true ? '#bca2ef' : 'white'),
-                                        height: `100vh`
-                                    }
-                                },
-                                draggableRootStyle: () => {
-                                    return {
+            <HotKeys keyMap={keyMap}>
+                <HotKeys handlers={this.handlers} style={{outline: 0}}>
 
+                    <>
+
+                        {
+                            this.renderWidgetList()
+                        }
+                        {
+                            this.renderComponents(
+                                [
+                                    {
+                                        id: `main`,
+                                        name: WidgetName.Grid,
+                                        params: {
+                                            container: true,
+                                            columnCount: 1
+                                        },
+                                        isDraggable: false,
+                                        children: this.state.components,
+                                        path: [],
+                                        tag: '',
+                                        droppableContainerStyle: (isDraggingOver: boolean) => {
+                                            return {
+                                                backgroundColor: isDraggingOver ? '#9867f7' : (true ? '#bca2ef' : 'white'),
+                                                height: `100vh`
+                                            }
+                                        },
+                                        draggableRootStyle: () => {
+                                            return {
+
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                        ])
-                }
-            </>
+                                ])
+                        }
+                    </>
+                </HotKeys>
+            </HotKeys>
         )
     }
 }
