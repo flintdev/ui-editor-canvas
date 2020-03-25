@@ -82,7 +82,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
         if (!destination) return;
         if (!isValid) return;
         const [sourceDroppableId, sourceContainer] = (source.droppableId || "").split("::");
-        const [destinationDroppableId, destinationContainer] = destination.droppableId.split("::");
+        const [destinationDroppableId, destinationContainer] = (destination.droppableId || "").split("::");
         let [sourceComponent, destinationComponent, curComponent] = Array(3);
 
         if (destinationDroppableId === draggableId) return;

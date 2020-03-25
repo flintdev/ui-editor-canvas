@@ -71,7 +71,7 @@ class ExampleContainer extends React.Component<any, object> {
                         label="isDnd"
                     />
 
-                    <div style={{opacity: isButtonSelected? 0 : 1, maxHeight: 40, minHeight: 40}}>
+                    <div style={{opacity: isButtonSelected? 0 : 1, maxHeight: 40, minHeight: 40}} onDragEnd={() => this.handleSelectButton(false)} onMouseUp={() => this.handleSelectButton(false)}>
                         {
                             !isButtonSelected ? <Button onMouseDown={() => this.handleSelectButton(true)}>Drag Me To Create Button</Button> :
                                 getWidget(WidgetName.Button, {
