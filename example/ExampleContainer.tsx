@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import UIEditorCanvas from "../src/UIEditorCanvas";
+import { Operations, EditorLib, ComponentData, Components } from "../src/UIEditorCanvas/interface";
 import { getWidget, WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData } from "./data/initComponentsData";
@@ -10,27 +11,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
 let count = 0;
-interface Operations {
-    updateComponents?: (components: ComponentData[]) => void,
-    addComponent?: (componentData: ComponentData) => void,
-    selectComponentById?: (componentId: string) => void,
-}
-
-interface EditorLib {
-    getWidget: (name: WidgetName, props: WidgetProps) => React.ReactElement
-}
-
-interface ComponentData {
-    id: string | number,
-    name: string,
-    params: object,
-    children?: Array<ComponentData>,
-    path?: Array<string | number>,
-    tag?: string,
-    columnParams?: object
-}
-
-type Components = Array<ComponentData>;
 
 const styles = createStyles({
     root: {
@@ -41,26 +21,30 @@ const styles = createStyles({
     },
     left: {
         width: `20vw`,
-        height: `100vw`,
+        height: `100vh`,
         display: 'flex',
         flexDirection: `column`
     },
     right: {
         width: `20vw`,
-        height: `100vw`,
+        height: `100vh`,
+        display: 'flex',
+        flexDirection: `column`
     },
     center: {
-        backgroundColor: '#fafafa',
+        backgroundColor: 'lightyellow',
         width: `60vw`,
-        height: `100vw`,
+        height: `100vh`,
+        display: 'flex',
+        flexDirection: `column`
     },
 });
-
 
 class ExampleContainer extends React.Component<any, object> {
     state = {
         selected: '',
-        isDnd: true
+        isDnd: true,
+        isButtonSelected: false
     }
     editorLib: EditorLib = {
         getWidget: getWidget
@@ -68,11 +52,14 @@ class ExampleContainer extends React.Component<any, object> {
     handleChange() {
         this.setState({ isDnd: !this.state.isDnd })
     }
+    handleSelectButton(val: boolean) {
+        this.setState({ isButtonSelected: val })
+    }
     operations: Operations = {};
     components: Components = [];
     render() {
         const { classes } = this.props;
-        const { selected, isDnd } = this.state;
+        const { selected, isDnd, isButtonSelected } = this.state;
         return (
             <div className={classes.root}>
                 {/* LEFT */}
@@ -83,11 +70,53 @@ class ExampleContainer extends React.Component<any, object> {
                         }
                         label="isDnd"
                     />
+
+                    <div style={{opacity: isButtonSelected? 0 : 1, maxHeight: 40, minHeight: 40}}>
+                        {
+                            !isButtonSelected ? <Button onMouseDown={() => this.handleSelectButton(true)}>Drag Me To Create Button</Button> :
+                                getWidget(WidgetName.Button, {
+                                    params: {
+                                        label: `Button-Dragged`,
+                                        variant: "outlined"
+                                    },
+                                    dnd: true,
+                                    draggableProps: {
+                                        draggableId: 'created-by-drag',
+                                        index: 0
+                                    },
+                                    onDragEnd: (result: any) => {
+                                        if (this.operations.onDragEnd) {
+                                            count += 1;
+                                            result.dragToCreate = true;
+                                            result.dragComponentData = {
+                                                id: `button-dragged-${count}`,
+                                                name: WidgetName.Button,
+                                                params: {
+                                                    "label": `Button-Dragged-${count}`,
+                                                    "variant": "outlined"
+                                                },
+                                                children: [],
+                                                path: [],
+                                                tag: ""
+                                            }
+                                            this.operations.onDragEnd(result)
+                                        }
+                                        this.handleSelectButton(false)
+                                    }
+                                } as any)
+                        }
+                    </div>
+
                     <Button onClick={() => {
                         if (this.operations.selectComponentById) {
                             this.operations.selectComponentById("button-2")
                         }
                     }}>Select "button-2"</Button>
+                    <Button onClick={() => {
+                        if (this.operations.deleteComponentById) {
+                            this.operations.deleteComponentById("button-2")
+                        }
+                    }}>Delete "button-2"</Button>
                     <Button variant="contained" onClick={() => {
                         if (this.operations.addComponent) {
                             count += 1;

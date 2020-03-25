@@ -1,5 +1,11 @@
+export {Props as UIEditorCanvasProps} from  "./UIEditorCanvas";
+
 export interface Operations {
     addComponent?: (componentData: ComponentData) => void,
+    updateComponents?: (components: ComponentData[]) => void
+    selectComponentById?: (componentId: string) => void,
+    deleteComponentById?: (componentId: string) => void,
+    onDragEnd?: Function
 }
 
 export interface EditorLib {
@@ -15,7 +21,8 @@ export interface ComponentData {
     tag?: string,
     isDraggable?: boolean,
     droppableContainerStyle?: Function,
-    draggableRootStyle?: Function
+    draggableRootStyle?: Function,
+    dragableOnMouseDown?: Function
 }
 
 export type Components = Array<ComponentData>;
