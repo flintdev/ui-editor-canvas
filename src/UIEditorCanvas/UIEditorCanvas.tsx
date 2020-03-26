@@ -5,6 +5,8 @@ import { withStyles, createStyles, WithStyles } from '@material-ui/core/styles';
 import { WidgetName, WidgetProps, getWidget } from "@flintdev/material-widgets";
 import { ComponentData, Operations, Components, EditorLib } from "./interface";
 import { HotKeys } from "react-hotkeys";
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 
 const mainGrid = {
     id: `main`,
@@ -22,7 +24,8 @@ const mainGrid = {
     tag: '',
     droppableContainerStyle: (isDraggingOver: boolean) => {
         return {
-            backgroundColor: isDraggingOver ? '#9867f7' : (true ? '#bca2ef' : 'white'),
+            // backgroundColor: isDraggingOver ? '#9867f7' : (true ? '#bca2ef' : 'white'),
+            backgroundColor: '#bca2ef',
             height: '100%'
         }
     },
@@ -39,7 +42,21 @@ const keyMap = {
 };
 
 const styles = createStyles({
-
+    actionIcon: {
+        fontSize: 20,
+        color: 'white',
+        margin: 7,
+        cursor: `pointer`
+    },
+    actionContainerOther: {
+        display: `flex`,
+        flexDirection: `row`,
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        backgroundColor: "#13c2c2",
+        borderRadius: `0 0 0 8px`,
+    }
 });
 
 export interface Props extends WithStyles<typeof styles>{
@@ -52,6 +69,9 @@ export interface Props extends WithStyles<typeof styles>{
     componentOnDelete: (componentData: ComponentData) => void
 }
 
+const ActionWrapper = (props: any) => {
+    return <div {...props}>{props.children}</div>
+}
 const HotkeyWarpper = (props: any) => (
     <HotKeys keyMap={keyMap} style={{height: 'inherit'}}>
         <HotKeys handlers={props.handlers} style={{outline: 0, height: 'inherit'}}>
@@ -76,41 +96,58 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     onDragEnd = (result: any) => {
-        console.log('>>> onDragEnd.result', result);
+        // console.log('>>> onDragEnd.result', result);
         let { source } = result; 
         const {destination, draggableId, isValid, dragToCreate, dragComponentData } = result;
-        if (!destination) return;
         if (!isValid) return;
+        if (!destination) return;
         const [sourceDroppableId, sourceContainer] = (source.droppableId || "").split("::");
         const [destinationDroppableId, destinationContainer] = (destination.droppableId || "").split("::");
         let [sourceComponent, destinationComponent, curComponent] = Array(3);
 
         if (destinationDroppableId === draggableId) return;
 
-        const search = (nodes: any[]) => {
-            for (let node of nodes) {
-                if (node.id === draggableId) {
-                    curComponent = node;
-                    return;
-                }
-                search(node.children)
-            }
-        };
-
         if (dragToCreate) {
             curComponent = dragComponentData
         } else {
+            const search = (nodes: any[]) => {
+                for (let node of nodes) {
+                    if (node.id === draggableId) {
+                        curComponent = node;
+                        return;
+                    }
+                    search(node.children)
+                }
+            };
             search(this.state.components);
         }
 
         const update = (nodes: any[]) => {
             for (let node of nodes) {
-                if (node.id === draggableId) continue
+                if (node.id === draggableId) continue  
                 if (node.id === sourceDroppableId) {
                     node.children = node.children.filter((child: any) => child.id !== draggableId);
                 }
                 if (node.id === destinationDroppableId) {
-                    node.children.splice(destination.index, 0, { ...curComponent, tag: destinationContainer });
+
+                    // find the insertIndex with destination.index and child.tag
+                    let countBefore = destination.index;
+                    let insertIndex = 0;
+                    if (countBefore > 0) {
+                        for (let i = 0; i < node.children.length; i++) {
+                            const child = node.children[i];
+                            
+                            if (child.tag === destinationContainer) {
+                                countBefore -= 1;
+                                if (countBefore === 0) {
+                                    insertIndex = i + 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    node.children.splice(insertIndex, 0, { ...curComponent, tag: destinationContainer });
                 }
                 node.children = update(node.children)
             }
@@ -127,6 +164,31 @@ class UIEditorCanvas extends React.Component<Props, any> {
         }
         this.handleComponentsUpdated(newComponents)
     };
+
+
+    handleDupWidget(e: any, component: ComponentData, droppableId: string, index: number, tag: string) {
+        e.stopPropagation();
+        const copyComponent = (component: any) => {
+            return {
+                ...component,
+                id: `${component.id}-${(new Date().getTime()).toString(36)}`,
+                children: (component?.children || []).map((child: any) => copyComponent(child))
+            }
+        }
+        this.onDragEnd(
+            {
+                draggableId: "",
+                isValid: true,
+                dragToCreate: true,
+                source: {},
+                dragComponentData: copyComponent(component),
+                destination: {
+                    droppableId: droppableId + (!!tag ? `::${tag}` : ""),
+                    index
+                }
+            }
+        )
+    }
 
     handleComponentsUpdated(newComponents: any[]) {
         this.setState({ components: newComponents })
@@ -210,6 +272,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
             const newPath = prevPath.concat(component!.id.toString());
             const { droppableContainerStyle, isDraggable, draggableRootStyle, dragableOnMouseDown } = component;
             const handleClickWithComponent = (e: any) => {
+                e.stopPropagation();
                 handleClick(e, component)
             }
             const RenderedComponent: React.ReactElement = editorLib.getWidget(component.name, {
@@ -238,19 +301,31 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     (isDraggingOver: boolean) => droppableContainerStyle(isDraggingOver) :
                     (isDraggingOver: boolean) => {
                         return {
-                            backgroundColor: isDraggingOver ? '#9867f7' : (component.name === "Grid" ? '#bca2ef' : 'white'),
+                            // backgroundColor: isDraggingOver ? '#9867f7' : (component.name === "Grid" ? '#bca2ef' : 'white'),
+                            backgroundColor: component.name === "Grid" ? '#bca2ef' : 'white',
                             minHeight: 60,
                             margin: 5,
                             border: `15px solid #bca2ef`
                         }
                     },
-                onMouseDown: !!dragableOnMouseDown ?
-                (e: any) => dragableOnMouseDown(e):
-                (e: any) => handleClickWithComponent(e),
+                onMouseDown: !!dragableOnMouseDown ? (e: any) => dragableOnMouseDown(e): (e: any) => handleClickWithComponent(e),
                 children: this.renderComponents(!!component.children ? component.children : [], newPath)
             })
+            return this.state.selectedId !== component.id ? 
+                React.cloneElement(RenderedComponent, { key:  component.id }) :
 
-            return RenderedComponent;
+                    <ActionWrapper
+                        style={{position: "relative"}}
+                        key={`ComponentWrapper-${index}`}
+                        tag={component.tag}
+                        id={newPath[newPath.length - 2]}
+                    >
+                        {React.cloneElement(RenderedComponent, { key:  component.id })}
+                        <div className={classes.actionContainerOther}>
+                            <FileCopyOutlinedIcon className={classes.actionIcon} onMouseDown={(e: any) => this.handleDupWidget(e, component, newPath[newPath.length - 2], index+1, component.tag || "")}/>
+                            <HighlightOffIcon className={classes.actionIcon} onMouseDown={() => this.deleteComponentById(component.id as string)}/>
+                        </div>
+                    </ActionWrapper>
         })
     }
 

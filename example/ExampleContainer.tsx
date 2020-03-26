@@ -34,9 +34,11 @@ const styles = createStyles({
     center: {
         backgroundColor: 'lightyellow',
         width: `60vw`,
-        height: `100vh`,
+        height: `70vh`,
         display: 'flex',
-        flexDirection: `column`
+        flexDirection: `column`,
+        overflow: 'auto',
+        padding: 20
     },
 });
 
