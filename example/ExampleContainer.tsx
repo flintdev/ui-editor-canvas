@@ -9,6 +9,7 @@ import { Button, TextField } from '@material-ui/core';
 import { initComponentsData } from "./data/initComponentsData";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import SimpleMenu from './components/Menu';
 
 let count = 0;
 
@@ -38,7 +39,8 @@ const styles = createStyles({
         display: 'flex',
         flexDirection: `column`,
         overflow: 'auto',
-        padding: 20
+        padding: 30,
+        margin: 30
     },
 });
 
@@ -47,7 +49,7 @@ class ExampleContainer extends React.Component<any, object> {
         selected: '',
         isDnd: true,
         isButtonSelected: false
-    }
+    };
     editorLib: EditorLib = {
         getWidget: getWidget
     };
@@ -66,13 +68,16 @@ class ExampleContainer extends React.Component<any, object> {
             <div className={classes.root}>
                 {/* LEFT */}
                 <div className={classes.left}>
+                    {/* isDnd Switch */}
                     <FormControlLabel
-                        control={
-                            <Switch checked={isDnd} onChange={() => this.handleChange()} value="checkedA" />
-                        }
+                        control={ <Switch checked={isDnd} onChange={() => this.handleChange()} value="checkedA" /> }
                         label="isDnd"
                     />
 
+                    {/* Add Widgets Menu */}
+                    <SimpleMenu operations={this.operations}/>
+
+                    {/* Drag to create */}
                     <div style={{opacity: isButtonSelected? 0 : 1, maxHeight: 40, minHeight: 40}} onDragEnd={() => this.handleSelectButton(false)} onMouseUp={() => this.handleSelectButton(false)}>
                         {
                             !isButtonSelected ? <Button onMouseDown={() => this.handleSelectButton(true)}>Drag Me To Create Button</Button> :
@@ -100,7 +105,7 @@ class ExampleContainer extends React.Component<any, object> {
                                                 children: [],
                                                 path: [],
                                                 tag: ""
-                                            }
+                                            };
                                             this.operations.onDragEnd(result)
                                         }
                                         this.handleSelectButton(false)
@@ -109,88 +114,8 @@ class ExampleContainer extends React.Component<any, object> {
                         }
                     </div>
 
-                    <Button onClick={() => {
-                        if (this.operations.selectComponentById) {
-                            this.operations.selectComponentById("button-2")
-                        }
-                    }}>Select "button-2"</Button>
-                    <Button onClick={() => {
-                        if (this.operations.deleteComponentById) {
-                            this.operations.deleteComponentById("button-2")
-                        }
-                    }}>Delete "button-2"</Button>
-                    <Button variant="contained" onClick={() => {
-                        if (this.operations.addComponent) {
-                            count += 1;
-                            this.operations.addComponent(
-                                {
-                                    id: `Label-${count}`,
-                                    name: WidgetName.Label,
-                                    params: {
-                                        text: `state::$.button.title::displayValue::${JSON.stringify(`Label-${count}`)}`,
-                                    },
-                                    children: [],
-                                    path: [],
-                                    tag: ''
-                                }
-                            );
-                        }
-                    }}>Add Label</Button>
-                    <Button variant="contained" onClick={() => {
-                        if (this.operations.addComponent) {
-                            count += 1;
-                            this.operations.addComponent(
-                                {
-                                    id: `button-${count}`,
-                                    name: WidgetName.Button,
-                                    params: {
-                                        label: `state::$.button.title::displayValue::${JSON.stringify(`button-${count}`)}`,
-                                        variant: "outlined"
-                                    },
-                                    children: [],
-                                    path: [],
-                                    tag: ''
-                                }
-                            );
-                        }
-                    }}>Add Button</Button>
-                    <Button variant="contained" onClick={() => {
-                        if (this.operations.addComponent) {
-                            count += 1;
-                            this.operations.addComponent(
-                                {
-                                    id: `TextField-${count}`,
-                                    name: WidgetName.TextField,
-                                    params: {
-                                        variant: "outlined"
-                                    },
-                                    children: [],
-                                    path: [],
-                                    tag: ''
-                                }
-                            );
-                        }
-                    }}>Add TextField</Button>
-                    <Button variant="contained" onClick={() => {
-                        if (this.operations.addComponent) {
-                            count += 1;
-                            this.operations.addComponent(
-                                {
-                                    id: `grid-${count}`,
-                                    name: WidgetName.Grid,
-                                    params: {
-                                        label: `grid-${count}`,
-                                        variant: "outlined",
-                                        container: true,
-                                        columnCount: 2,
-                                    },
-                                    children: [],
-                                    path: [],
-                                    tag: ''
-                                }
-                            );
-                        }
-                    }}>Add Grid</Button>
+                    <Button onClick={() => {if (this.operations.selectComponentById) this.operations.selectComponentById("Button-2")}}>Select "Button-2"</Button>
+                    <Button onClick={() => {if (this.operations.deleteComponentById) this.operations.deleteComponentById("Button-2")}}>Delete "Button-2"</Button>
                 </div>
 
                 {/* CENTER */}
@@ -209,6 +134,14 @@ class ExampleContainer extends React.Component<any, object> {
                         }}
                         componentOnDelete={(componentData: ComponentData) => {
                             console.log('>>> componentOnDelete.componentData', componentData)
+                        }}
+                        customConfig={{
+                            selectedColor: "#0054c2",
+                            gridColor: "#efd885",
+                            containerColor: "#efb722",
+                            dropContainerMargin: 5,
+                            dragWeigtPadding: 10,
+                            containerMinHeight: 60
                         }}
                     />
                 </div>
