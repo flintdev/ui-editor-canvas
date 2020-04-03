@@ -1,47 +1,29 @@
 // ~/github/flintdev/ui-editor-canvas/src/UIEditorCanvas/UIEditorCanvas.tsx
 
 import * as React from 'react';
-import { withStyles, createStyles, WithStyles } from '@material-ui/core/styles';
-import { ComponentData, Operations, Components, EditorLib } from "./interface";
-import { HotKeys } from "react-hotkeys";
+import {findDOMNode} from 'react-dom';
+import {withStyles, createStyles, WithStyles} from '@material-ui/core/styles';
+import {ComponentData, Operations, Components, EditorLib, CustomConfig} from "./interface";
+import {HotKeys} from "react-hotkeys";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import CanvasWidget from '../CanvasWidget';
+import * as _ from "lodash";
+import {WidgetName} from "@flintdev/material-widgets/dist";
+
+export interface Props extends WithStyles<typeof styles> {
+    isDnd?: boolean,
+    customConfig?: CustomConfig,
+    operations: Operations,
+    components: ComponentData[],
+    editorLib: EditorLib,
+    componentsUpdated: (components: Components) => void,
+    componentOnSelect: (componentData: ComponentData) => void,
+    componentOnDelete: (componentData: ComponentData) => void
+}
 
 const mainCanvasWidgetName = "CanvasWidget";
-const mainCanvasWidget = {
-    id: `main`,
-    name: mainCanvasWidgetName,
-    params: {
-        container: true,
-        columnCount: 1,
-        style: {
-            height: 'inherit'
-        }
-    },
-    isDraggable: false,
-    children: [],
-    path: [],
-    tag: '',
-    droppableContainerStyle: (isDraggingOver: boolean) => {
-        return {
-            // backgroundColor: isDraggingOver ? '#9867f7' : (true ? '#bca2ef' : 'white'),
-            backgroundColor: '#bca2ef',
-            height: '100%'
-        }
-    },
-    draggableRootStyle: () => {
-        return {
-            height: 'inherit'
-        }
-    },
-    dragableOnMouseDown: () => { }
-};
-
-const keyMap = {
-    DELETE_NODE: ["del", "backspace"]
-};
-
+const keyMap = {DELETE_NODE: ["del", "backspace"]};
 const styles = createStyles({
     actionIcon: {
         fontSize: 20,
@@ -54,43 +36,43 @@ const styles = createStyles({
         flexDirection: `row`,
         position: 'absolute',
         right: 0,
-        top: 0,
-        backgroundColor: "#13c2c2",
-        borderRadius: `0 0 0 8px`,
+        top: -30,
+        borderRadius: `8px 0 0 0`,
     }
 });
 
-export interface Props extends WithStyles<typeof styles> {
-    isDnd?: boolean,
-    operations: Operations,
-    components: ComponentData[],
-    editorLib: EditorLib,
-    componentsUpdated: (components: Components) => void,
-    componentOnSelect: (componentData: ComponentData) => void,
-    componentOnDelete: (componentData: ComponentData) => void
-}
-
 const ActionWrapper = (props: any) => {
     return <div {...props}>{props.children}</div>
-}
-const HotkeyWarpper = (props: any) => (
-    <HotKeys keyMap={keyMap} style={{ height: 'inherit' }}>
-        <HotKeys handlers={props.handlers} style={{ outline: 0, height: 'inherit' }}>
+};
+
+const HotKeyWrapper = (props: any) => (
+    <HotKeys keyMap={keyMap} style={{height: 'inherit'}}>
+        <HotKeys handlers={props.handlers} style={{outline: 0, height: 'inherit'}}>
             {props.children}
         </HotKeys>
     </HotKeys>
-)
+);
 
 class UIEditorCanvas extends React.Component<Props, any> {
+    static defaultProps = {
+        customConfig: {
+            selectedColor: "#13c2c2",
+            gridColor: "#e0d8ef",
+            containerColor: "#bca2ef",
+            dropContainerMargin: 5,
+            dragWeigtPadding: 10,
+            containerMinHeight: 60
+        }
+    };
+
     constructor(props: any) {
         super(props);
         this.state = {
             components: [],
             selectedId: ""
-        }
+        };
 
         this.addComponent = this.addComponent.bind(this);
-        // this.onDragEnd = this.onDragEnd.bind(this);
         this.selectComponentById = this.selectComponentById.bind(this);
         this.deleteComponentById = this.deleteComponentById.bind(this);
         this.updateComponents = this.updateComponents.bind(this);
@@ -98,8 +80,8 @@ class UIEditorCanvas extends React.Component<Props, any> {
 
     onDragEnd = (result: any) => {
         // console.log('>>> onDragEnd.result', result);
-        let { source } = result;
-        const { destination, draggableId, isValid, dragToCreate, dupToCreate, dragComponentData } = result;
+        let {source} = result;
+        const {destination, draggableId, isValid, dragToCreate, dupToCreate, dragComponentData} = result;
         if (!isValid) return;
         if (!destination) return;
         const [sourceDroppableId, sourceContainer] = (source.droppableId || "").split("::");
@@ -130,13 +112,13 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     node.children = node.children.filter((child: any) => child.id !== draggableId);
                 }
                 if (node.id === destinationDroppableId) {
-                    
+
                     // find the insertIndex with destination.index and child.tag
                     let insertIndex = 0;
                     let countBefore = destination.index;
                     if (dupToCreate) {
                         insertIndex = destination.index;
-                    } else if (countBefore > 0 ) {
+                    } else if (countBefore > 0) {
                         for (let i = 0; i < node.children.length; i++) {
                             const child = node.children[i];
 
@@ -150,7 +132,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                         }
                     }
 
-                    node.children.splice(insertIndex, 0, { ...curComponent, tag: destinationContainer });
+                    node.children.splice(insertIndex, 0, {...curComponent, tag: destinationContainer});
                 }
                 node.children = update(node.children)
             }
@@ -163,7 +145,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
             newComponents = newComponents.filter((child: any) => child.id !== draggableId);
         }
         if (destinationDroppableId === 'main') {
-            newComponents.splice(destination.index, 0, { ...curComponent, tag: destinationContainer });
+            newComponents.splice(destination.index, 0, {...curComponent, tag: destinationContainer});
         }
         this.handleComponentsUpdated(newComponents)
     };
@@ -174,10 +156,10 @@ class UIEditorCanvas extends React.Component<Props, any> {
         const copyComponent = (component: any) => {
             return {
                 ...component,
-                id: `${component.id}-${(new Date().getTime()).toString(36)}`,
+                id: `${component.id}-${(new Date().getTime()).toString(36)}-${_.uniqueId()}`,
                 children: (component?.children || []).map((child: any) => copyComponent(child))
             }
-        }
+        };
         this.onDragEnd(
             {
                 draggableId: "",
@@ -194,13 +176,14 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     handleComponentsUpdated(newComponents: any[]) {
-        this.setState({ components: newComponents })
+        this.setState({components: newComponents});
         this.props.componentsUpdated(newComponents);
     }
 
     handlers = {
         DELETE_NODE: () => {
             if (this.state.selectedId) {
+                console.log("delete with key ", this.state.selectedId);
                 this.handleComponentOnDeleteById(this.state.selectedId)
             }
         }
@@ -211,9 +194,9 @@ class UIEditorCanvas extends React.Component<Props, any> {
         const update = (nodes: any[]) => {
             return nodes.reduce((ret, node) => {
                 if (node.id === componentId) {
-                    nodeToDelete = { ...node }
+                    nodeToDelete = {...node}
                 } else {
-                    node.children = update(node.children)
+                    node.children = update(node.children);
                     ret.push(node);
                 }
                 return ret;
@@ -221,12 +204,12 @@ class UIEditorCanvas extends React.Component<Props, any> {
         };
         this.handleComponentsUpdated(
             update(this.state.components)
-        )
-        this.props.componentOnDelete({ ...nodeToDelete } as ComponentData)
+        );
+        this.props.componentOnDelete({...nodeToDelete} as ComponentData)
     }
 
     componentDidMount() {
-        this.handleComponentsUpdated(this.props.components)
+        this.handleComponentsUpdated(this.props.components);
         this.props.operations.addComponent = this.addComponent;
         this.props.operations.selectComponentById = this.selectComponentById;
         this.props.operations.deleteComponentById = this.deleteComponentById;
@@ -235,7 +218,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     selectComponentById(componentId: string) {
-        this.setState({ selectedId: componentId })
+        this.setState({selectedId: componentId})
     }
 
     deleteComponentById(componentId: string) {
@@ -251,12 +234,12 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
-        const { editorLib, componentOnSelect, classes, isDnd } = this.props;
+        const {editorLib, componentOnSelect, classes, isDnd} = this.props;
         const handleClick = (e: any, component: any) => {
             e.stopPropagation();
             componentOnSelect(component);
-            this.setState({ selectedId: component.id })
-        }
+            this.setState({selectedId: component.id})
+        };
         const cleanParmas = (parmas: object) => {
             return Object.keys(parmas).reduce<Record<string, any>>((ret, key) => {
                 if (typeof Object(parmas)[key] === "string") {
@@ -269,15 +252,17 @@ class UIEditorCanvas extends React.Component<Props, any> {
                 ret[key] = Object(parmas)[key];
                 return ret;
             }, {});
-        }
+        };
 
         return components.map((component: ComponentData, index: number) => {
+            const {customConfig} = this.props;
+            const isInlineBlock = component?.canvas?.display === "inline-block";
             const newPath = prevPath.concat(component!.id.toString());
-            const { droppableContainerStyle, isDraggable, draggableRootStyle, dragableOnMouseDown } = component;
+            const {droppableContainerStyle, isDraggable, draggableRootStyle, dragableOnMouseDown} = component;
             const handleClickWithComponent = (e: any) => {
                 e.stopPropagation();
                 handleClick(e, component)
-            }
+            };
             const componentProps = {
                 ...component,
                 params: cleanParmas(component.params),
@@ -292,10 +277,12 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     () => draggableRootStyle() :
                     () => {
                         return {
-                            backgroundColor: component.name === "Grid" ? '#e0d8ef' : 'white',
-                            padding: 5,
-                            boxShadow: this.state.selectedId === component.id ? `inset 0px 0px 0px 5px #13c2c2` : "inset 0px 0px 0px 5px #0000ff00",
-                            transition: `all .5s`,
+                            backgroundColor: component.name === "Grid" ? customConfig?.gridColor : 'white',
+                            padding: customConfig?.dragWeigtPadding,
+                            boxShadow: this.state.selectedId === component.id ? `inset 0px 0px 0px 5px ${customConfig?.selectedColor}` : "inset 0px 0px 0px 5px #0000ff00",
+                            display: isInlineBlock ? "inline-block" : "flex",
+                            flexGrow: isInlineBlock ? 0 : 1,
+                            placeSelf: isInlineBlock ? "flex-start" : "stretch",
                             border: `1px solid grey`,
                             margin: 1
                         }
@@ -304,48 +291,83 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     (isDraggingOver: boolean) => droppableContainerStyle(isDraggingOver) :
                     (isDraggingOver: boolean) => {
                         return {
-                            // backgroundColor: isDraggingOver ? '#9867f7' : (component.name === "Grid" ? '#bca2ef' : 'white'),
-                            backgroundColor: component.name === "Grid" ? '#bca2ef' : 'white',
-                            minHeight: 60,
-                            margin: 5,
-                            border: `15px solid #bca2ef`
+                            backgroundColor: component.name === "Grid" ? customConfig?.containerColor : 'white',
+                            minHeight: customConfig?.containerMinHeight,
+                            border: `${customConfig?.dropContainerMargin}px solid ${customConfig?.gridColor}`
                         }
                     },
-                onMouseDown: !!dragableOnMouseDown ? 
+                onMouseDown: !!dragableOnMouseDown ?
                     (e: any) => dragableOnMouseDown(e) :
                     (e: any) => handleClickWithComponent(e),
                 children: this.renderComponents(!!component.children ? component.children : [], newPath)
             };
 
-            const RenderedComponent = component.name === mainCanvasWidgetName ? 
-                <CanvasWidget {...componentProps} /> : 
-                editorLib.getWidget(component.name, componentProps)
+            const RenderedComponent = component.name === mainCanvasWidgetName ?
+                <CanvasWidget {...componentProps} /> :
+                editorLib.getWidget(component.name, componentProps);
 
-            return this.state.selectedId !== component.id ?
-                React.cloneElement(RenderedComponent, { key: component.id }) :
+            return !isDnd || (this.state.selectedId !== component.id) ?
+                React.cloneElement(RenderedComponent, {key: component.id}) :
                 <ActionWrapper
-                    style={{ position: "relative" }}
+                    style={{position: "relative", display: isInlineBlock ? "inline-block" : "flex", flexGrow: isInlineBlock ? 0 : 1, placeSelf: isInlineBlock ? "flex-start" : "stretch"}}
                     key={`ComponentWrapper-${index}`}
                     tag={component.tag}
                     id={component.id}
-                    onMouseDown={(e: any) => {e.stopPropagation()}}
+                    onMouseDown={(e: any) => {
+                        e.stopPropagation()
+                    }}
                 >
-                    <div id={newPath[newPath.length - 2]}>
-                        {React.cloneElement(RenderedComponent, { key: component.id })}
+                    <div id={newPath[newPath.length - 2]} style={{display: isInlineBlock ? "inline-block" : "flex", flexGrow: isInlineBlock ? 0 : 1}}>
+                        {React.cloneElement(RenderedComponent, {key: component.id})}
                     </div>
-                    <div className={classes.actionContainerOther}>
-                        <FileCopyOutlinedIcon className={classes.actionIcon} onMouseDown={(e: any) => this.handleDupWidget(e, component, newPath[newPath.length - 2], index + 1, component.tag || "")} />
-                        <HighlightOffIcon className={classes.actionIcon} onMouseDown={() => this.deleteComponentById(component.id as string)} />
+                    <div className={classes.actionContainerOther}
+                         style={{backgroundColor: customConfig?.selectedColor}}>
+                        <FileCopyOutlinedIcon className={classes.actionIcon}
+                                              onMouseDown={(e: any) => this.handleDupWidget(e, component, newPath[newPath.length - 2], index + 1, component.tag || "")}/>
+                        <HighlightOffIcon className={classes.actionIcon}
+                                          onMouseDown={() => this.deleteComponentById(component.id as string)}/>
                     </div>
                 </ActionWrapper>
         })
     }
 
     render() {
+        const {customConfig} = this.props;
         return (
-            <HotkeyWarpper handlers={this.handlers}>
-                {this.renderComponents([{ ...mainCanvasWidget, children: this.state.components }])}
-            </HotkeyWarpper>
+            <HotKeyWrapper handlers={this.handlers}>
+                {this.renderComponents([
+                        {
+                            id: `main`,
+                            name: mainCanvasWidgetName,
+                            params: {
+                                container: true,
+                                columnCount: 1,
+                                style: {
+                                    height: 'inherit'
+                                }
+                            },
+                            isDraggable: false,
+                            path: [],
+                            tag: '',
+                            droppableContainerStyle: (isDraggingOver: boolean) => {
+                                return {
+                                    backgroundColor: customConfig?.containerColor,
+                                    height: '100%',
+                                    display: "flex",
+                                    flexFlow: "column"
+                                }
+                            },
+                            draggableRootStyle: () => {
+                                return {
+                                    height: 'inherit'
+                                }
+                            },
+                            dragableOnMouseDown: () => {},
+                            children: this.state.components
+                        }
+                    ])
+                }
+            </HotKeyWrapper>
         )
     }
 }
