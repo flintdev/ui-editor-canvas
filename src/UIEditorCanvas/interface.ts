@@ -8,6 +8,15 @@ export interface Operations {
     onDragEnd?: Function
 }
 
+export interface CustomConfig {
+    selectedColor?: string, 
+    gridColor?: string, 
+    dragWeigtPadding?: number,
+    dropContainerMargin?: number,
+    containerColor?: string,
+    containerMinHeight?: number,
+}
+
 export interface EditorLib {
     getWidget: (name: string, props: object) => React.ReactElement
 }
@@ -16,6 +25,9 @@ export interface ComponentData {
     id: string | number,
     name: string,
     params: object,
+    canvas?: {
+        display?: string
+    },
     children?: Array<ComponentData>,
     path?: Array<string | number>,
     tag?: string,
