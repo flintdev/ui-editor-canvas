@@ -68,7 +68,6 @@ class UIEditorCanvas extends React.Component<Props, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            components: [],
             selectedId: ""
         };
 
@@ -102,7 +101,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     search(node.children)
                 }
             };
-            search(this.state.components);
+            search(this.props.components);
         }
 
         const update = (nodes: any[]) => {
@@ -139,7 +138,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
             return nodes;
         };
 
-        let newComponents = JSON.parse(JSON.stringify(update(this.state.components)));
+        let newComponents = JSON.parse(JSON.stringify(update(this.props.components)));
 
         if (sourceDroppableId === 'main') {
             newComponents = newComponents.filter((child: any) => child.id !== draggableId);
@@ -176,7 +175,6 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     handleComponentsUpdated(newComponents: any[]) {
-        this.setState({components: newComponents});
         this.props.componentsUpdated(newComponents);
     }
 
@@ -203,7 +201,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
             }, []);
         };
         this.handleComponentsUpdated(
-            update(this.state.components)
+            update(this.props.components)
         );
         this.props.componentOnDelete({...nodeToDelete} as ComponentData)
     }
@@ -230,7 +228,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     addComponent(componentData: ComponentData) {
-        this.handleComponentsUpdated([componentData, ...this.state.components])
+        this.handleComponentsUpdated([componentData, ...this.props.components])
     }
 
     renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
@@ -254,7 +252,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
             }, {});
         };
 
-        return components.map((component: ComponentData, index: number) => {
+        return components.filter(component => !component.hidden).map((component: ComponentData, index: number) => {
             const {customConfig} = this.props;
             const isInlineBlock = component?.canvas?.display === "inline-block";
             const newPath = prevPath.concat(component!.id.toString());
@@ -363,7 +361,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                                 }
                             },
                             dragableOnMouseDown: () => {},
-                            children: this.state.components
+                            children: this.props.components
                         }
                     ])
                 }

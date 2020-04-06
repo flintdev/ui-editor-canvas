@@ -48,7 +48,8 @@ class ExampleContainer extends React.Component<any, object> {
     state = {
         selected: '',
         isDnd: true,
-        isButtonSelected: false
+        isButtonSelected: false,
+        components: []
     };
     editorLib: EditorLib = {
         getWidget: getWidget
@@ -60,10 +61,9 @@ class ExampleContainer extends React.Component<any, object> {
         this.setState({ isButtonSelected: val })
     }
     operations: Operations = {};
-    components: Components = [];
     render() {
         const { classes } = this.props;
-        const { selected, isDnd, isButtonSelected } = this.state;
+        const { selected, isDnd, isButtonSelected, components } = this.state;
         return (
             <div className={classes.root}>
                 {/* LEFT */}
@@ -123,9 +123,10 @@ class ExampleContainer extends React.Component<any, object> {
                     <UIEditorCanvas
                         isDnd={isDnd}
                         operations={this.operations}
-                        components={this.components}
+                        components={components}
                         editorLib={this.editorLib}
                         componentsUpdated={(components: Components) => {
+                            this.setState({components: components})
                             console.log('>>> componentsUpdated.components', components)
                         }}
                         componentOnSelect={(componentData: ComponentData) => {

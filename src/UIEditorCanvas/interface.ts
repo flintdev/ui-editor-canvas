@@ -25,6 +25,7 @@ export interface ComponentData {
     id: string | number,
     name: string,
     params: object,
+    hidden?: boolean,
     canvas?: {
         display?: string
     },
