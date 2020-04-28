@@ -52,7 +52,8 @@ export default function SimpleMenu(props: any) {
                     params : {
                         container: true,
                         columnCount: 2,
-                    }
+                    },
+                    overlay: true
                 }
             default:
                 return {

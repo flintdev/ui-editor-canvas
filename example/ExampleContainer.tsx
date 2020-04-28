@@ -114,7 +114,9 @@ class ExampleContainer extends React.Component<any, object> {
                         }
                     </div>
 
-                    <Button onClick={() => {if (this.operations.selectComponentById) this.operations.selectComponentById("Button-2")}}>Select "Button-2"</Button>
+                    <Button onClick={() => {if (this.operations.selectComponentById) this.operations.selectComponentById("Button-1")}}>Select "Button-1"</Button>
+                    <Button onClick={() => {if (this.operations.selectComponentById) this.operations.selectComponentById("Grid-2")}}>Select "Grid-2"</Button>
+                    <Button onClick={() => {if (this.operations.selectComponentById) this.operations.selectComponentById("Label-3")}}>Select "Label-3"</Button>
                     <Button onClick={() => {if (this.operations.deleteComponentById) this.operations.deleteComponentById("Button-2")}}>Delete "Button-2"</Button>
                 </div>
 
