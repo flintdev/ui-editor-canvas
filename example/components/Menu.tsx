@@ -53,6 +53,9 @@ export default function SimpleMenu(props: any) {
                         container: true,
                         columnCount: 2,
                     },
+                    canvas: {
+                        defaultTag: "grid-0"
+                    },
                     overlay: true
                 }
             default:

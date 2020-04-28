@@ -8,7 +8,7 @@ export default class CanvasWidget extends Widget<WidgetProps> {
     renderCustomComponent() {
         return (
             <React.Fragment>
-                    {this.placeContainer("0")}
+                    {this.placeContainer("ui-editor-canvas-main")}
             </React.Fragment>
         )
     }

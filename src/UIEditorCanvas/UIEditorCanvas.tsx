@@ -312,6 +312,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     isDraggable: isDraggable
                 },
                 dnd: isDnd,
+                defaultTag: _.get(component, ["canvas", "defaultTag"], ""),
                 onDragEnd: (data: any) => this.onDragEnd(data),
                 draggableRootStyle: !!draggableRootStyle ?
                     () => draggableRootStyle() :
@@ -389,6 +390,9 @@ class UIEditorCanvas extends React.Component<Props, any> {
                             isDraggable: false,
                             path: [],
                             tag: '',
+                            canvas: {
+                                defaultTag: 'ui-editor-canvas-main'
+                            },
                             droppableContainerStyle: (isDraggingOver: boolean) => {
                                 return {
                                     backgroundColor: customConfig?.containerColor,

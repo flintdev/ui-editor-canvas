@@ -28,7 +28,8 @@ export interface ComponentData {
     hidden?: boolean,
     overlay?: boolean,
     canvas?: {
-        display?: string
+        display?: string,
+        defaultTag?: string
     },
     children?: Array<ComponentData>,
     path?: Array<string | number>,
