@@ -45,7 +45,7 @@ module.exports = {
             filename: "./index.html"
         }),
         new CopyPlugin([
-            { from: `./resources/plugin.js`, to: `./resources/` },
+            { from: `./resources/plugin.js`, to: `./` },
         ]),
     ]
 };
