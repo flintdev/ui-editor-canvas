@@ -68,7 +68,9 @@ class UIEditorCanvas extends React.Component<Props, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            selectedId: ""
+            selectedId: "",
+            isSelectedInOverlay: false,
+            overlayComponent: null
         };
 
         this.addComponent = this.addComponent.bind(this);
@@ -188,7 +190,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
     };
 
     handleComponentOnDeleteById(componentId: string) {
-        let nodeToDelete = {};
+        let nodeToDelete: any = {};
         const update = (nodes: any[]) => {
             return nodes.reduce((ret, node) => {
                 if (node.id === componentId) {
@@ -203,6 +205,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
         this.handleComponentsUpdated(
             update(this.props.components)
         );
+        if (!!nodeToDelete.overlay) this.setState({isSelectedInOverlay: false, overlayComponent: {}})
         this.props.componentOnDelete({...nodeToDelete} as ComponentData)
     }
 
@@ -216,7 +219,24 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     selectComponentById(componentId: string) {
-        this.setState({selectedId: componentId})
+        let target: any = null;
+        const preOrder = (node: any, tempOverlay: any) => {
+            if (!node || !node.children || !!target) return;
+            if (node.id === componentId) {
+                target = tempOverlay || (node.overlay === true ? node : null)
+            } else {
+                for (let child of node.children) {
+                    preOrder(child, tempOverlay || (node.overlay === true ? node : null))
+                }
+            }
+        };
+
+        for (let node of this.props.components) {
+            preOrder(node, null);
+        }
+        target = target || {}
+
+        this.setState({selectedId: componentId, overlayComponent: target, isSelectedInOverlay: !!target.overlay})
     }
 
     deleteComponentById(componentId: string) {
@@ -228,7 +248,27 @@ class UIEditorCanvas extends React.Component<Props, any> {
     }
 
     addComponent(componentData: ComponentData) {
-        this.handleComponentsUpdated([componentData, ...this.props.components])
+        if (this.state.isSelectedInOverlay) {
+            const update = (nodes: any[]) => {
+                return nodes.reduce((ret, node) => {
+                    if (node.id === this.state.overlayComponent.id) {
+                        node.children = [componentData, ...node.children];
+                        this.setState({overlayComponent: node})
+                    } else {
+                        node.children = update(node.children);
+                    }
+                    ret.push(node);
+                    return ret;
+                }, []);
+            };
+            this.handleComponentsUpdated(update(this.props.components));
+        } else {
+            this.handleComponentsUpdated([componentData, ...this.props.components])
+        }
+        if (!!componentData.overlay) {
+            this.setState({selectedId: componentData.id, overlayComponent: componentData, isSelectedInOverlay: true})
+        }
+        
     }
 
     renderComponents(components: Array<ComponentData>, prevPath: any[] = []): Array<React.ReactElement> {
@@ -236,7 +276,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
         const handleClick = (e: any, component: any) => {
             e.stopPropagation();
             componentOnSelect(component);
-            this.setState({selectedId: component.id})
+            this.selectComponentById(component.id);
         };
         const cleanParmas = (parmas: object) => {
             return Object.keys(parmas).reduce<Record<string, any>>((ret, key) => {
@@ -252,7 +292,9 @@ class UIEditorCanvas extends React.Component<Props, any> {
             }, {});
         };
 
-        return components.filter(component => !component.hidden).map((component: ComponentData, index: number) => {
+        return components.filter(component => !component.hidden && 
+                (this.state.isSelectedInOverlay ? true : component.overlay !== true)
+            ).map((component: ComponentData, index: number) => {
             const {customConfig} = this.props;
             const isInlineBlock = component?.canvas?.display === "inline-block";
             const newPath = prevPath.concat(component!.id.toString());
@@ -361,7 +403,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                                 }
                             },
                             dragableOnMouseDown: () => {},
-                            children: this.props.components
+                            children: this.state.isSelectedInOverlay ? [this.state.overlayComponent] : this.props.components
                         }
                     ])
                 }
