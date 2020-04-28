@@ -9,6 +9,7 @@
         "noImplicitAny": true,
         "noImplicitThis": true,
         "strictNullChecks": true,
+        "suppressImplicitAnyIndexErrors": true,
         "module": "commonjs",
         "target": "es2017",
         "allowJs": true,

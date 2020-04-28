@@ -4,12 +4,45 @@ import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import UIEditorCanvas from "../src/UIEditorCanvas";
 import { Operations, EditorLib, ComponentData, Components } from "../src/UIEditorCanvas/interface";
-import { getWidget, WidgetName, WidgetProps } from "@flintdev/material-widgets";
+import { WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData } from "./data/initComponentsData";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import SimpleMenu from './components/Menu';
+
+
+export function getWidget(name: string, props: any) {
+    // const tempList: any = name.split('::');
+    // const widgetName = tempList[1];
+    // const pluginId = tempList[0];
+
+    const widgetName = name;
+    const pluginId = "material-widgets";
+    const library: any = window[pluginId]
+    const getWidgetFunc = library['getWidget'];
+    return getWidgetFunc(widgetName, props);
+}
+
+export function getWidgetConfiguration(name: string) {
+    // const tempList: any = name.split('::');
+    // const widgetName = tempList[1];
+    // const pluginId = tempList[0];
+    
+    const widgetName = name;
+    const pluginId = "material-widgets";
+    const library: any = window[pluginId]
+    const getWidgetConfigurationFunc = library['getWidgetConfiguration'];
+    return getWidgetConfigurationFunc(widgetName);
+}
+
+export function getWidgetInfo(pluginId: string) {
+    // const libraryName: any = pluginId;
+    
+    const libraryName = "material-widgets";
+    const library: any = window[libraryName]
+    return library['widgetInfo'];
+}
 
 let count = 0;
 
@@ -51,9 +84,7 @@ class ExampleContainer extends React.Component<any, object> {
         isButtonSelected: false,
         components: []
     };
-    editorLib: EditorLib = {
-        getWidget: getWidget
-    };
+
     handleChange() {
         this.setState({ isDnd: !this.state.isDnd })
     }
@@ -126,7 +157,7 @@ class ExampleContainer extends React.Component<any, object> {
                         isDnd={isDnd}
                         operations={this.operations}
                         components={components}
-                        editorLib={this.editorLib}
+                        editorLib={{getWidget: getWidget}}
                         componentsUpdated={(components: Components) => {
                             this.setState({components: components})
                             console.log('>>> componentsUpdated.components', components)
