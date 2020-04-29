@@ -6,11 +6,12 @@ import UIEditorCanvas from "../src/UIEditorCanvas";
 import { Operations, EditorLib, ComponentData, Components } from "../src/UIEditorCanvas/interface";
 import { WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
-import { initComponentsData } from "./data/initComponentsData";
+import { initComponentsData, customNodes } from "./data/initComponentsData";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import SimpleMenu from './components/Menu';
 
+const pluginId = "antd-widgets";
 
 export function getWidget(name: string, props: any) {
     // const tempList: any = name.split('::');
@@ -18,7 +19,6 @@ export function getWidget(name: string, props: any) {
     // const pluginId = tempList[0];
 
     const widgetName = name;
-    const pluginId = "material-widgets";
     const library: any = window[pluginId]
     const getWidgetFunc = library['getWidget'];
     return getWidgetFunc(widgetName, props);
@@ -30,16 +30,13 @@ export function getWidgetConfiguration(name: string) {
     // const pluginId = tempList[0];
     
     const widgetName = name;
-    const pluginId = "material-widgets";
     const library: any = window[pluginId]
     const getWidgetConfigurationFunc = library['getWidgetConfiguration'];
     return getWidgetConfigurationFunc(widgetName);
 }
 
-export function getWidgetInfo(pluginId: string) {
-    // const libraryName: any = pluginId;
-    
-    const libraryName = "material-widgets";
+export function getWidgetInfo(_pluginId: string) {
+    const libraryName: any = pluginId;
     const library: any = window[libraryName]
     return library['widgetInfo'];
 }
@@ -112,10 +109,12 @@ class ExampleContainer extends React.Component<any, object> {
                     <div style={{opacity: isButtonSelected? 0 : 1, maxHeight: 40, minHeight: 40}} onDragEnd={() => this.handleSelectButton(false)} onMouseUp={() => this.handleSelectButton(false)}>
                         {
                             !isButtonSelected ? <Button onMouseDown={() => this.handleSelectButton(true)}>Drag Me To Create Button</Button> :
-                                getWidget(WidgetName.Button, {
+                                getWidget("KubeEditor", {
                                     params: {
-                                        label: `Button-Dragged`,
-                                        variant: "outlined"
+                                        data: {},
+                                        customNodes: customNodes,
+                                        hidePanel: "show",
+                                        hideMinimap: "show"
                                     },
                                     dnd: true,
                                     draggableProps: {
@@ -128,10 +127,12 @@ class ExampleContainer extends React.Component<any, object> {
                                             result.dragToCreate = true;
                                             result.dragComponentData = {
                                                 id: `button-dragged-${count}`,
-                                                name: WidgetName.Button,
+                                                name: "KubeEditor",
                                                 params: {
-                                                    "label": `Button-Dragged-${count}`,
-                                                    "variant": "outlined"
+                                                    data: {},
+                                                    customNodes: customNodes,
+                                                    hidePanel: "view",
+                                                    hideMinimap: "show"
                                                 },
                                                 children: [],
                                                 path: [],

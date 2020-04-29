@@ -1,33 +1,35 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/",
-        "sourceMap": true,
-        "lib": [
-            "es6",
-            "dom"
-        ],
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "strictNullChecks": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "module": "commonjs",
-        "target": "es2017",
-        "allowJs": true,
-        "resolveJsonModule": true,
-        "declaration": true,
-        "jsx": "react",
-        "baseUrl": ".",
-        "paths": {
-            "src": [
-                "src/*"
-            ]
-        }
+      "outDir": "./dist/",
+      "sourceMap": true,
+      "types": ["node"],
+      "lib": ["es6", "dom"],
+      "noImplicitAny": false,
+      "noImplicitThis": false,
+      "strictNullChecks": true,
+      "module": "commonjs",
+      "target": "es2017",
+      "allowJs": true,
+      "esModuleInterop": true,
+      "declaration": true,
+      "jsx": "react",
+      "baseUrl": "./src",
+      "typeRoots": ["./src/typings.d.ts"],
+      "paths": {
+        "src": ["src/*"],
+        "example": ["example/*"]
+      }
     },
     "exclude": [
-        "node_modules",
-        "dist"
+      "node_modules",
+      "dist"
     ],
     "include": [
-        "src/**/*"
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "src/**/*.d.ts",
+      "src/**/*.yaml",
+      "src/**/*.less",
+      "node_modules/@types/node/globals.d.ts"
     ]
-}
+  }

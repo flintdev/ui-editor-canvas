@@ -22,7 +22,6 @@
   "homepage": "https://github.com/flintdev/ui-editor-canvas#readme",
   "devDependencies": {
     "js-yaml": "^3.13.1",
-    "copy-webpack-plugin": "^5.1.1",
     "@flintdev/material-widgets": "^0.0.46",
     "@flintdev/widget-builder": "^0.0.29",
     "@material-ui/core": "^4.8.3",
