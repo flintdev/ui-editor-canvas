@@ -11,7 +11,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import SimpleMenu from './components/Menu';
 
-const pluginId = "antd-widgets";
+// const pluginId = "antd-widgets";
+const pluginId = "material-widgets";
 
 export function getWidget(name: string, props: any) {
     // const tempList: any = name.split('::');
