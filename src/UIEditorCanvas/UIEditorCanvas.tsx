@@ -407,7 +407,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                                 }
                             },
                             dragableOnMouseDown: () => {},
-                            children: this.state.isSelectedInOverlay ? [this.state.overlayComponent] : this.props.components
+                            children: this.state.isSelectedInOverlay ? [{...this.state.overlayComponent, tag: 'ui-editor-canvas-main'}] : this.props.components
                         }
                     ])
                 }
