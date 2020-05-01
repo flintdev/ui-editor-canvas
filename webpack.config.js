@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     context: __dirname,
@@ -42,6 +43,9 @@ module.exports = {
         new HtmlWebPackPlugin({
             template: "./example/index.html",
             filename: "./index.html"
-        })
+        }),
+        new CopyPlugin([
+            { from: `./resources/material-widgets/plugin.js`, to: `./` },
+        ]),
     ]
 };
