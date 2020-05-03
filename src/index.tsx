@@ -3,3 +3,4 @@
 import UIEditorCanvas from "./UIEditorCanvas";
 
 export default UIEditorCanvas;
+export {WidgetDndWrapperProps, WidgetDndWrapper} from "./WidgetDndWrapper";
