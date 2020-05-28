@@ -1,7 +1,7 @@
 // ~/github/flintdev/ui-editor-canvas/src/UIEditorCanvas/UIEditorCanvas.tsx
 
 import * as React from 'react';
-import {findDOMNode} from 'react-dom';
+import {utils} from '../../src';
 import {withStyles, createStyles, WithStyles} from '@material-ui/core/styles';
 import {ComponentData, Operations, Components, EditorLib, CustomConfig} from "./interface";
 import {HotKeys} from "react-hotkeys";
@@ -60,7 +60,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
             gridColor: "#e0d8ef",
             containerColor: "#bca2ef",
             dropContainerMargin: 5,
-            dragWeigtPadding: 10,
+            dragWidgetPadding: 10,
             containerMinHeight: 60
         }
     };
@@ -92,7 +92,8 @@ class UIEditorCanvas extends React.Component<Props, any> {
         if (destinationDroppableId === draggableId) return;
 
         if (dragToCreate || dupToCreate) {
-            curComponent = dragComponentData
+            curComponent = dragComponentData;
+            curComponent.id = utils.getUUId();
         } else {
             const search = (nodes: any[]) => {
                 for (let node of nodes) {
@@ -319,7 +320,7 @@ class UIEditorCanvas extends React.Component<Props, any> {
                     () => {
                         return {
                             backgroundColor: component.name === "Grid" ? customConfig?.gridColor : 'white',
-                            padding: customConfig?.dragWeigtPadding,
+                            padding: customConfig?.dragWidgetPadding,
                             boxShadow: this.state.selectedId === component.id ? `inset 0px 0px 0px 5px ${customConfig?.selectedColor}` : "inset 0px 0px 0px 5px #0000ff00",
                             display: isInlineBlock ? "inline-block" : "flex",
                             flexGrow: isInlineBlock ? 0 : 1,
