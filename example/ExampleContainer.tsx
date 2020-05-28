@@ -4,7 +4,7 @@ import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import UIEditorCanvas from "../src/UIEditorCanvas";
 import { Operations, EditorLib, ComponentData, Components } from "../src/UIEditorCanvas/interface";
-import { WidgetDndWrapper } from "../dist";
+import { WidgetDndWrapper } from "../src";
 import { WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData, customNodes } from "./data/initComponentsData";
@@ -94,6 +94,7 @@ class ExampleContainer extends React.Component<any, object> {
     render() {
         const { classes } = this.props;
         const { selected, isDnd, isButtonSelected, components } = this.state;
+        // @ts-ignore
         return (
             <div className={classes.root}>
                 {/* LEFT */}
@@ -117,16 +118,21 @@ class ExampleContainer extends React.Component<any, object> {
                         widgetData={
                             {
                                 id: `dragged-widget-uuid`,
-                                name: "KoniEditor",
+                                name: "Button",
                                 params: {
-                                    data: {},
-                                    customNodes: [],
-                                    hidePanel: "view",
-                                    hideMinimap: "show"
+                                    // data: {},
+                                    // customNodes: [],
+                                    // hidePanel: "view",
+                                    // hideMinimap: "show"
+                                    // label: "Button-1",
+                                    // variant: "outlined"
                                 },
                                 children: [],
                                 path: [],
-                                tag: ""
+                                tag: "",
+                                // canvas: {
+                                //     "display": "inline-block"
+                                // }
                             }
                         }
                     />
@@ -159,7 +165,7 @@ class ExampleContainer extends React.Component<any, object> {
                             gridColor: "#efd885",
                             containerColor: "#efb722",
                             dropContainerMargin: 5,
-                            dragWeigtPadding: 10,
+                            dragWidgetPadding: 10,
                             containerMinHeight: 60
                         }}
                     />
