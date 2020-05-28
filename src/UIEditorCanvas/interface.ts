@@ -11,7 +11,7 @@ export interface Operations {
 export interface CustomConfig {
     selectedColor?: string, 
     gridColor?: string, 
-    dragWeigtPadding?: number,
+    dragWidgetPadding?: number,
     dropContainerMargin?: number,
     containerColor?: string,
     containerMinHeight?: number,
