@@ -1,6 +1,6 @@
 {
   "name": "@flintdev/ui-editor-canvas",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "npm package to edit ui widget componet tree as flint component",
   "main": "dist/index.js",
   "scripts": {

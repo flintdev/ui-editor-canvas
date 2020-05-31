@@ -1,7 +1,7 @@
 // ~/github/flintdev/ui-editor-canvas/src/UIEditorCanvas/UIEditorCanvas.tsx
 
 import * as React from 'react';
-import {utils} from '../../src';
+import utils from '../utils';
 import {withStyles, createStyles, WithStyles} from '@material-ui/core/styles';
 import {ComponentData, Operations, Components, EditorLib, CustomConfig} from "./interface";
 import {HotKeys} from "react-hotkeys";
@@ -9,7 +9,6 @@ import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import CanvasWidget from '../CanvasWidget';
 import * as _ from "lodash";
-import {WidgetName} from "@flintdev/material-widgets/dist";
 
 export interface Props extends WithStyles<typeof styles> {
     isDnd?: boolean,

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import UIEditorCanvas from "../src/UIEditorCanvas";
 import { Operations, EditorLib, ComponentData, Components } from "../src/UIEditorCanvas/interface";
-import { WidgetDndWrapper } from "../src";
+import { WidgetDndWrapper } from "../dist";
 import { WidgetName, WidgetProps } from "@flintdev/material-widgets";
 import { Button, TextField } from '@material-ui/core';
 import { initComponentsData, customNodes } from "./data/initComponentsData";
@@ -120,19 +120,15 @@ class ExampleContainer extends React.Component<any, object> {
                                 id: `dragged-widget-uuid`,
                                 name: "Button",
                                 params: {
-                                    // data: {},
-                                    // customNodes: [],
-                                    // hidePanel: "view",
-                                    // hideMinimap: "show"
-                                    // label: "Button-1",
-                                    // variant: "outlined"
+                                    "label": "state::$.button.title::displayValue::\"Button-2\"",
+                                    "variant": "outlined"
                                 },
                                 children: [],
                                 path: [],
                                 tag: "",
-                                // canvas: {
-                                //     "display": "inline-block"
-                                // }
+                                canvas: {
+                                    "display": "inline-block"
+                                }
                             }
                         }
                     />
